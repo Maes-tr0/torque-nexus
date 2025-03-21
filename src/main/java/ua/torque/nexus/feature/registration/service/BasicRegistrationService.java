@@ -2,13 +2,15 @@ package ua.torque.nexus.feature.registration.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import ua.torque.nexus.feature.token.email.model.dto.ConfirmationResponse;
+import ua.torque.nexus.feature.registration.event.RegistrationCompleteEvent;
 import ua.torque.nexus.feature.registration.model.User;
 import ua.torque.nexus.feature.registration.model.dto.RegistrationRequest;
 import ua.torque.nexus.feature.registration.model.dto.RegistrationResponse;
 import ua.torque.nexus.feature.registration.model.mapper.RegistrationMapper;
-import ua.torque.nexus.feature.token.email.model.ConfirmationToken;
-import ua.torque.nexus.feature.token.email.service.ConfirmationTokenService;
+import ua.torque.nexus.feature.token.email.service.ConfirmationTokenDataService;
 
 import java.util.Optional;
 
@@ -18,7 +20,8 @@ import java.util.Optional;
 public class BasicRegistrationService implements RegistrationService {
     private final UserDataService userDataService;
     private final RegistrationMapper registrationMapper;
-    private final ConfirmationTokenService confirmationTokenService;
+    private final ConfirmationTokenDataService confirmationTokenDataService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public RegistrationResponse registerUser(RegistrationRequest request) {
@@ -27,7 +30,9 @@ public class BasicRegistrationService implements RegistrationService {
         User user = requestToUser(request);
         userDataService.save(user);
 
-        confirmationTokenService.saveConfirmationToken(user);
+        confirmationTokenDataService.saveConfirmationToken(user);
+
+        eventPublisher.publishEvent(new RegistrationCompleteEvent(user));
 
         RegistrationResponse response = userToRegistrationResponse(user);
         log.info("Registration completed for email={}", response.email());
@@ -52,5 +57,9 @@ public class BasicRegistrationService implements RegistrationService {
                     log.error("Mapping failed: User → RegistrationResponse for userId={}", user.getId());
                     return new RuntimeException("Failed to convert User to RegistrationResponse.");
                 });
+    }
+
+    public ConfirmationResponse confirmEmail(String token){
+        return confirmationTokenDataService.confirmToken(token);
     }
 }

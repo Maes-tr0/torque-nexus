@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import ua.torque.nexus.feature.token.email.model.dto.ConfirmationResponse;
 import ua.torque.nexus.feature.registration.model.User;
 import ua.torque.nexus.feature.registration.repository.UserRepository;
 import ua.torque.nexus.feature.token.email.model.ConfirmationToken;
@@ -15,15 +16,15 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-public class ConfirmationTokenService {
+public class ConfirmationTokenDataService {
     private final ConfirmationTokenRepository confirmationTokenRepository;
     private final UserRepository userRepository;
     private final long EXPIRATION_TIME;
 
 
-    public ConfirmationTokenService(ConfirmationTokenRepository confirmationTokenRepository,
-                                    UserRepository userRepository,
-                                    @Value("${registration.token.expiry.hour}") long expirationTime) {
+    public ConfirmationTokenDataService(ConfirmationTokenRepository confirmationTokenRepository,
+                                        UserRepository userRepository,
+                                        @Value("${registration.token.expiry.hour}") long expirationTime) {
         this.confirmationTokenRepository = confirmationTokenRepository;
         this.userRepository = userRepository;
         this.EXPIRATION_TIME = expirationTime;
@@ -35,6 +36,16 @@ public class ConfirmationTokenService {
         confirmationToken.setUser(user);
 
         confirmationTokenRepository.save(confirmationToken);
+    }
+
+    private void updateConfirmationToken(ConfirmationToken confirmationToken) {
+        confirmationToken.setConfirmedAt(LocalDateTime.now());
+
+        confirmationTokenRepository.save(confirmationToken);
+    }
+
+    public ConfirmationToken getConfirmationToken(User user) {
+        return confirmationTokenRepository.findByUser(user);
     }
 
     private ConfirmationToken generateConfirmationToken() {
@@ -61,5 +72,18 @@ public class ConfirmationTokenService {
             userRepository.delete(user);
             log.info("Deleted expired token {} and user {}", token.getToken(), user.getEmail());
         });
+    }
+
+    public ConfirmationResponse confirmToken(String token) {
+        ConfirmationToken confirmToken = confirmationTokenRepository.findByToken(token)
+                .orElseThrow(() -> new RuntimeException(""));
+
+        if(confirmToken.getExpiresAt().getSecond() > LocalDateTime.now().getSecond()){
+            updateConfirmationToken(confirmToken);
+
+            return new ConfirmationResponse(confirmToken.getToken(), confirmToken.getConfirmedAt());
+        }
+
+        throw new RuntimeException("Expired token");
     }
 }
