@@ -7,6 +7,8 @@ import ua.torque.nexus.feature.registration.model.User;
 import ua.torque.nexus.feature.registration.model.dto.RegistrationRequest;
 import ua.torque.nexus.feature.registration.model.dto.RegistrationResponse;
 import ua.torque.nexus.feature.registration.model.mapper.RegistrationMapper;
+import ua.torque.nexus.feature.token.email.model.ConfirmationToken;
+import ua.torque.nexus.feature.token.email.service.ConfirmationTokenService;
 
 import java.util.Optional;
 
@@ -16,6 +18,7 @@ import java.util.Optional;
 public class BasicRegistrationService implements RegistrationService {
     private final UserDataService userDataService;
     private final RegistrationMapper registrationMapper;
+    private final ConfirmationTokenService confirmationTokenService;
 
     @Override
     public RegistrationResponse registerUser(RegistrationRequest request) {
@@ -23,6 +26,8 @@ public class BasicRegistrationService implements RegistrationService {
 
         User user = requestToUser(request);
         userDataService.save(user);
+
+        confirmationTokenService.saveConfirmationToken(user);
 
         RegistrationResponse response = userToRegistrationResponse(user);
         log.info("Registration completed for email={}", response.email());
