@@ -8,9 +8,10 @@ import ua.torque.nexus.feature.registration.model.dto.RegistrationResponse;
 
 import java.util.Optional;
 
+
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface RegistrationMapper {
-    Optional<User> toUser(RegistrationRequest request);
+    User toUser(RegistrationRequest request);
 
-    Optional<RegistrationResponse> toUserRegistrationResponse(User user);
+    RegistrationResponse toUserRegistrationResponse(User user);
 }
