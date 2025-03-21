@@ -10,6 +10,4 @@ public interface RegistrationService {
     User requestToUser(RegistrationRequest request);
 
     RegistrationResponse userToRegistrationResponse(User user);
-
-    boolean userIsRegistered(User user);
 }

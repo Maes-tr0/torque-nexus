@@ -6,17 +6,21 @@ import ua.torque.nexus.feature.registration.model.User;
 import ua.torque.nexus.feature.registration.model.dto.RegistrationRequest;
 import ua.torque.nexus.feature.registration.model.dto.RegistrationResponse;
 import ua.torque.nexus.feature.registration.model.mapper.RegistrationMapper;
-import ua.torque.nexus.feature.registration.repository.UserRepository;
 
 @Service
 @RequiredArgsConstructor
 public class BasicRegistrationService implements RegistrationService {
-    private final UserRepository userRepository;
+    private final UserDataService userDataService;
     private final RegistrationMapper registrationMapper;
+
 
     @Override
     public RegistrationResponse registerUser(RegistrationRequest request) {
-        return null;
+        final User user = requestToUser(request);
+
+        userDataService.save(user);
+
+        return userToRegistrationResponse(user);
     }
 
     @Override
@@ -25,15 +29,9 @@ public class BasicRegistrationService implements RegistrationService {
                 .orElseThrow(() -> new RuntimeException("Failed to convert RegistrationRequest to User."));
     }
 
-
     @Override
     public RegistrationResponse userToRegistrationResponse(User user) {
         return registrationMapper.toUserRegistrationResponse(user)
                 .orElseThrow(() -> new RuntimeException("Failed to convert User to RegistrationResponse."));
-    }
-
-    @Override
-    public boolean userIsRegistered(User user) {
-        return userRepository.findByEmail(user.getEmail()).isPresent();
     }
 }
