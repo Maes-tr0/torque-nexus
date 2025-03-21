@@ -5,14 +5,14 @@ import org.springframework.stereotype.Service;
 import ua.torque.nexus.feature.registration.model.User;
 import ua.torque.nexus.feature.registration.model.dto.RegistrationRequest;
 import ua.torque.nexus.feature.registration.model.dto.RegistrationResponse;
+import ua.torque.nexus.feature.registration.model.mapper.RegistrationMapper;
 import ua.torque.nexus.feature.registration.repository.UserRepository;
-
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class BasicRegistrationService implements RegistrationService {
     private final UserRepository userRepository;
+    private final RegistrationMapper registrationMapper;
 
     @Override
     public RegistrationResponse registerUser(RegistrationRequest request) {
@@ -20,22 +20,20 @@ public class BasicRegistrationService implements RegistrationService {
     }
 
     @Override
-    public Optional<User> requestToUser(RegistrationRequest request) {
-        return Optional.empty();
+    public User requestToUser(RegistrationRequest request) {
+        return registrationMapper.toUser(request)
+                .orElseThrow(() -> new RuntimeException("Failed to convert RegistrationRequest to User."));
     }
 
+
     @Override
-    public Optional<RegistrationResponse> userToRegistrationResponse(User user) {
-        return Optional.empty();
+    public RegistrationResponse userToRegistrationResponse(User user) {
+        return registrationMapper.toUserRegistrationResponse(user)
+                .orElseThrow(() -> new RuntimeException("Failed to convert User to RegistrationResponse."));
     }
 
     @Override
     public boolean userIsRegistered(User user) {
-        return false;
-    }
-
-    @Override
-    public boolean userIsValid(User user) {
-        return false;
+        return userRepository.findByEmail(user.getEmail()).isPresent();
     }
 }
