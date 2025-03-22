@@ -18,10 +18,12 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class BasicRegistrationService implements RegistrationService, EmailConfirmationService {
+
     private final UserDataService userDataService;
     private final RegistrationMapper registrationMapper;
     private final ConfirmationTokenDataService confirmationTokenDataService;
     private final ApplicationEventPublisher eventPublisher;
+    private final AccessControlService accessControlService;
 
     @Override
     public RegistrationResponse registerUser(RegistrationRequest request) {
@@ -42,7 +44,8 @@ public class BasicRegistrationService implements RegistrationService, EmailConfi
     @Override
     public User requestToUser(RegistrationRequest request) {
         log.debug("Mapping RegistrationRequest to User for email={}", request.getEmail());
-        return Optional.ofNullable(registrationMapper.toUser(request))
+
+        return Optional.ofNullable(registrationMapper.toUser(request, accessControlService))
                 .orElseThrow(() -> {
                     log.error("Mapping failed: RegistrationRequest → User for email={}", request.getEmail());
                     return new RuntimeException("Failed to convert RegistrationRequest to User.");
@@ -59,7 +62,8 @@ public class BasicRegistrationService implements RegistrationService, EmailConfi
                 });
     }
 
-    public ConfirmationResponse confirmEmail(String token){
+    @Override
+    public ConfirmationResponse confirmEmail(String token) {
         return confirmationTokenDataService.confirmToken(token);
     }
 }

@@ -81,7 +81,6 @@ public class User {
     )
     private Set<Role> roles = new HashSet<>();
 
-
     @Column(name = "created_at", updatable = false, nullable = false)
     @CreationTimestamp
     private LocalDateTime created;
@@ -91,11 +90,12 @@ public class User {
     private LocalDateTime updated;
 
     @Builder
-    public User(String fullName, String email, String password, String phoneNumber) {
+    public User(String fullName, String email, String password, String phoneNumber, Role role) {
         this.fullName = fullName;
         this.email = email;
         this.password = password;
         this.phoneNumber = phoneNumber;
+        this.roles = Set.of(role);
     }
 
     public Set<Permission> getPermissions() {

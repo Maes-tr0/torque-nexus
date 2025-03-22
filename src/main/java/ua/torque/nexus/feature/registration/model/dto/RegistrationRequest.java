@@ -30,8 +30,7 @@ public class RegistrationRequest {
     @NotNull(message = "Password cannot be null")
     @Pattern(
             regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$",
-            message = "Password must be at least 8 characters long and contain at least one digit, " +
-                    "one lowercase and one uppercase letter"
+            message = "Password must be at least 8 characters long and contain at least one digit, one lowercase and one uppercase letter"
     )
     private String password;
 
@@ -42,4 +41,7 @@ public class RegistrationRequest {
             message = "Phone number must contain only digits and optional '+' prefix"
     )
     private String phoneNumber;
+
+    @Builder.Default
+    private String role = "CUSTOMER";
 }
