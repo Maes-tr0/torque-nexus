@@ -32,6 +32,6 @@ public class ConfirmationEmailService {
     }
 
     private String buildLink(@NotBlank String token) {
-        return "http://localhost:8080/api/v1/auth/confirm?token=%s".formatted(token);
+        return "http://localhost:8080/api/v1/confirm?token=%s".formatted(token);
     }
 }

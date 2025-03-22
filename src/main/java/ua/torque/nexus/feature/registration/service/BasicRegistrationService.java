@@ -17,7 +17,7 @@ import java.util.Optional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class BasicRegistrationService implements RegistrationService {
+public class BasicRegistrationService implements RegistrationService, EmailConfirmationService {
     private final UserDataService userDataService;
     private final RegistrationMapper registrationMapper;
     private final ConfirmationTokenDataService confirmationTokenDataService;
