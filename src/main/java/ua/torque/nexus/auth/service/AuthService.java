@@ -9,6 +9,7 @@ import ua.torque.nexus.auth.dto.RegistrationResponse;
 import ua.torque.nexus.auth.dto.ResetPasswordRequest;
 import ua.torque.nexus.auth.dto.ResetPasswordResponse;
 import ua.torque.nexus.auth.mapper.AuthMapper;
+import ua.torque.nexus.feature.token.email.model.ConfirmationToken;
 import ua.torque.nexus.user.model.User;
 import ua.torque.nexus.user.service.UserDataService;
 
@@ -25,10 +26,15 @@ public class AuthService {
 
         User user = authMapper.registrationRequestToUser(request);
 
-        userDataService.saveNewUser(user);
+        ConfirmationToken token = userDataService.saveNewUser(user);
         log.info("User saved with email: {}", user.getEmail());
 
-        RegistrationResponse response = authMapper.userToRegistrationResponse(user);
+        RegistrationResponse base = authMapper.toRegistrationResponse(user);
+        RegistrationResponse response = RegistrationResponse.builder()
+                .email(base.email())
+                .message(base.message())
+                .token(token.getToken())
+                .build();
         log.info("Registration response generated for email: {}", user.getEmail());
 
         return response;
@@ -37,9 +43,9 @@ public class AuthService {
     public ResetPasswordResponse resetPassword(@Valid ResetPasswordRequest request) {
         log.info("Processing reset password for email: {}", request.getEmail());
 
-        User user = authMapper.resetPasswordRequestToUser(request);
+        User user = userDataService.getUserByEmail(request.getEmail());
 
-        userDataService.updatePasswordUser(user, user.getPassword());
+        userDataService.updatePasswordUser(user, request.getNewPassword());
         log.info("Password updated for user with email: {}", user.getEmail());
 
         ResetPasswordResponse response = authMapper.userToResetPasswordResponse(user);

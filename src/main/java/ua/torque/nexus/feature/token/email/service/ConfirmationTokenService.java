@@ -28,7 +28,7 @@ public class ConfirmationTokenService {
     }
 
     @Transactional
-    public void generateTokenForUser(User user) {
+    public ConfirmationToken generateTokenForUser(User user) {
         if (user == null || user.getEmail() == null) {
             throw new IllegalArgumentException("User must not be null");
         }
@@ -42,6 +42,8 @@ public class ConfirmationTokenService {
 
         ConfirmationToken saved = confirmationTokenRepository.save(token);
         log.info("Generated confirmation token={} for user={}", saved.getToken(), user.getEmail());
+
+        return saved;
     }
 
     @Transactional

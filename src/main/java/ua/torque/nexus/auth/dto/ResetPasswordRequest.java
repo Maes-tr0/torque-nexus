@@ -23,5 +23,5 @@ public class ResetPasswordRequest {
             regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$",
             message = "Password must be at least 8 characters long and contain at least one digit, one lowercase and one uppercase letter"
     )
-    private String password;
+    private String newPassword;
 }

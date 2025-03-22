@@ -1,6 +1,7 @@
 package ua.torque.nexus.auth.mapper;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import ua.torque.nexus.auth.dto.RegistrationRequest;
 import ua.torque.nexus.auth.dto.RegistrationResponse;
@@ -13,9 +14,11 @@ public interface AuthMapper {
 
     User registrationRequestToUser(RegistrationRequest registrationRequest);
 
-    RegistrationResponse userToRegistrationResponse(User user);
+    @Mapping(target = "message", constant = "Registration successful — please confirm your email")
+    RegistrationResponse toRegistrationResponse(User user);
 
     User resetPasswordRequestToUser(ResetPasswordRequest resetPasswordRequest);
 
+    @Mapping(target = "message", constant="Password successful changed")
     ResetPasswordResponse userToResetPasswordResponse(User user);
 }
