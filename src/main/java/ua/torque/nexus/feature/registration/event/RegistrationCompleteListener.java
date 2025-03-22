@@ -18,7 +18,7 @@ public class RegistrationCompleteListener {
     @Async
     @EventListener
     public void onRegistrationComplete(RegistrationCompleteEvent event) {
-        User user = event.getUser();
+        User user = event.user();
         log.info("Handling RegistrationCompleteEvent for {}", user.getEmail());
         notificationService.sendConfirmationEmail(user);
     }

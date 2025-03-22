@@ -1,6 +1,8 @@
-CREATE SEQUENCE IF NOT EXISTS seq_user_id START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE IF NOT EXISTS seq_user_id
+    START WITH 1
+    INCREMENT BY 1;
 
-CREATE TABLE users
+CREATE TABLE IF NOT EXISTS users
 (
     id           BIGINT                      NOT NULL,
     full_name    VARCHAR(255)                NOT NULL,

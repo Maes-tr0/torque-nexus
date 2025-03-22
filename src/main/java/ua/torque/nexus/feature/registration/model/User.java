@@ -2,9 +2,13 @@ package ua.torque.nexus.feature.registration.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
@@ -21,7 +25,9 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -67,6 +73,15 @@ public class User {
     )
     private String phoneNumber;
 
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "user_role",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private Set<Role> roles = new HashSet<>();
+
+
     @Column(name = "created_at", updatable = false, nullable = false)
     @CreationTimestamp
     private LocalDateTime created;
@@ -81,6 +96,14 @@ public class User {
         this.email = email;
         this.password = password;
         this.phoneNumber = phoneNumber;
+    }
+
+    public Set<Permission> getPermissions() {
+        Set<Permission> permissions = new HashSet<>();
+        if (roles != null) {
+            roles.forEach(role -> permissions.addAll(role.getPermissions()));
+        }
+        return permissions;
     }
 
     @Override

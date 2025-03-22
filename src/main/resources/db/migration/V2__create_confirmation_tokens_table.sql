@@ -1,6 +1,8 @@
-CREATE SEQUENCE IF NOT EXISTS seq_confirmation_token_id START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE IF NOT EXISTS seq_confirmation_token_id
+    START WITH 1
+    INCREMENT BY 1;
 
-CREATE TABLE confirmation_tokens
+CREATE TABLE IF NOT EXISTS confirmation_tokens
 (
     id           BIGINT                      NOT NULL,
     token        VARCHAR(255) UNIQUE         NOT NULL,
