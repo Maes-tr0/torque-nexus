@@ -26,7 +26,7 @@ public class AccessControlService {
     private final PermissionRepository permissionRepository;
     private final UserRepository userRepository;
 
-    public Role createRole(String name, String description) {
+    public Role createRole(String name) {
         Optional<Role> existingRole = roleRepository.findByName(name);
         if (existingRole.isPresent()) {
             log.warn("Role with name {} already exists", name);
