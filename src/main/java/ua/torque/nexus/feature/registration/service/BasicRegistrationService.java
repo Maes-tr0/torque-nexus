@@ -2,14 +2,12 @@ package ua.torque.nexus.feature.registration.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
-import ua.torque.nexus.feature.token.email.model.dto.ConfirmationResponse;
-import ua.torque.nexus.feature.registration.event.RegistrationCompleteEvent;
 import ua.torque.nexus.feature.registration.model.User;
 import ua.torque.nexus.feature.registration.model.dto.RegistrationRequest;
 import ua.torque.nexus.feature.registration.model.dto.RegistrationResponse;
 import ua.torque.nexus.feature.registration.model.mapper.RegistrationMapper;
+import ua.torque.nexus.feature.token.email.model.dto.ConfirmationResponse;
 import ua.torque.nexus.feature.token.email.service.ConfirmationTokenDataService;
 
 import java.util.Optional;
@@ -22,7 +20,6 @@ public class BasicRegistrationService implements RegistrationService, EmailConfi
     private final UserDataService userDataService;
     private final RegistrationMapper registrationMapper;
     private final ConfirmationTokenDataService confirmationTokenDataService;
-    private final ApplicationEventPublisher eventPublisher;
     private final AccessControlService accessControlService;
 
     @Override
@@ -33,8 +30,6 @@ public class BasicRegistrationService implements RegistrationService, EmailConfi
         userDataService.save(user);
 
         confirmationTokenDataService.saveConfirmationToken(user);
-
-        eventPublisher.publishEvent(new RegistrationCompleteEvent(user));
 
         RegistrationResponse response = userToRegistrationResponse(user);
         log.info("Registration completed for email={}", response.email());

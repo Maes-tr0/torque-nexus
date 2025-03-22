@@ -76,14 +76,14 @@ public class ConfirmationTokenDataService {
 
     public ConfirmationResponse confirmToken(String token) {
         ConfirmationToken confirmToken = confirmationTokenRepository.findByToken(token)
-                .orElseThrow(() -> new RuntimeException(""));
+                .orElseThrow(() -> new RuntimeException("Token not found"));
 
-        if(confirmToken.getExpiresAt().getSecond() > LocalDateTime.now().getSecond()){
+        if (LocalDateTime.now().isBefore(confirmToken.getExpiresAt())) {
             updateConfirmationToken(confirmToken);
-
             return new ConfirmationResponse(confirmToken.getToken(), confirmToken.getConfirmedAt());
         }
 
         throw new RuntimeException("Expired token");
     }
+
 }

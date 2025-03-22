@@ -92,15 +92,23 @@ public class AccessControlService {
 
             if (finalRoleType == RoleType.CUSTOMER) {
                 Permission permission = permissionRepository.findByName(PermissionType.READ.name())
-                        .orElseGet(() -> createPermission(PermissionType.READ.name(), "Default read permission"));
+                        .orElseGet(() ->
+                                createPermission(PermissionType.READ.name(),
+                                        "Default read permission"));
                 newRole.getPermissions().add(permission);
             } else if (finalRoleType == RoleType.ADMIN) {
                 Permission readPermission = permissionRepository.findByName(PermissionType.READ.name())
-                        .orElseGet(() -> createPermission(PermissionType.READ.name(), "Default read permission"));
+                        .orElseGet(() ->
+                                createPermission(PermissionType.READ.name(),
+                                        "Default read permission"));
                 Permission writePermission = permissionRepository.findByName(PermissionType.WRITE.name())
-                        .orElseGet(() -> createPermission(PermissionType.WRITE.name(), "Default write permission"));
+                        .orElseGet(() ->
+                                createPermission(PermissionType.WRITE.name(),
+                                        "Default write permission"));
                 Permission deletePermission = permissionRepository.findByName(PermissionType.DELETE.name())
-                        .orElseGet(() -> createPermission(PermissionType.DELETE.name(), "Default delete permission"));
+                        .orElseGet(() ->
+                                createPermission(PermissionType.DELETE.name(),
+                                        "Default delete permission"));
                 newRole.getPermissions().add(readPermission);
                 newRole.getPermissions().add(writePermission);
                 newRole.getPermissions().add(deletePermission);
