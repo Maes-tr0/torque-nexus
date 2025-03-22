@@ -15,7 +15,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ua.torque.nexus.feature.registration.model.User;
+import ua.torque.nexus.user.model.User;
 
 import java.time.LocalDateTime;
 
@@ -58,9 +58,11 @@ public class ConfirmationToken {
     @Builder
     public ConfirmationToken(String token,
                              LocalDateTime createdAt,
-                             LocalDateTime expiresAt) {
+                             LocalDateTime expiresAt,
+                             User user) {
         this.token = token;
         this.createdAt = createdAt;
         this.expiresAt = expiresAt;
+        this.user = user;
     }
 }
