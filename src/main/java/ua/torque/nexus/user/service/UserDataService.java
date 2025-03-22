@@ -8,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ua.torque.nexus.access.exception.PasswordUpdateException;
+import ua.torque.nexus.access.exception.UserSaveException;
 import ua.torque.nexus.access.model.RoleType;
 import ua.torque.nexus.access.service.AccessControlService;
 import ua.torque.nexus.feature.token.email.model.ConfirmationToken;
@@ -47,7 +49,7 @@ public class UserDataService {
             return confirmationTokenService.generateTokenForUser(user);
         } catch (Exception e) {
             log.error("Error saving user: {}", user.getEmail());
-            throw new RuntimeException("Failed to save user");
+            throw new UserSaveException("Failed to save user");
         }
     }
 
@@ -69,13 +71,12 @@ public class UserDataService {
                 throw new SamePasswordException("New password must be different from the old password");
             }
 
-
             user.setPassword(passwordEncoder.encode(newPassword));
             userRepository.save(user);
             log.info("Password updated successfully for user: {}", user.getEmail());
         } catch (Exception e) {
             log.error("Error updating password for user: {}", user.getEmail());
-            throw new RuntimeException("Failed to update password");
+            throw new PasswordUpdateException("Failed to update password");
         }
     }
 

@@ -29,7 +29,7 @@ public class RegistrationRequest {
     @NotBlank(message = "Password cannot be blank")
     @NotNull(message = "Password cannot be null")
     @Pattern(
-            regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$",
+            regexp = "^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$",
             message = "Password must be at least 8 characters long and contain at least one digit, one lowercase and one uppercase letter"
     )
     private String password;
@@ -37,7 +37,7 @@ public class RegistrationRequest {
     @Size(min = 10, max = 15,
             message = "The phone number must contain 10 to 15 characters")
     @Pattern(
-            regexp = "\\+?[0-9]+",
+            regexp = "\\+?\\d+",
             message = "Phone number must contain only digits and optional '+' prefix"
     )
     private String phoneNumber;

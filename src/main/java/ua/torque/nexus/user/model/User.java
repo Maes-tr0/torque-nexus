@@ -71,7 +71,7 @@ public class User {
     @Size(min = 10, max = 15,
             message = "The phone number must contain 10 to 15 characters")
     @Pattern(
-            regexp = "\\+?[0-9]+",
+            regexp = "\\+?\\d+",
             message = "Phone number must contain only digits and optional '+' prefix"
     )
     private String phoneNumber;

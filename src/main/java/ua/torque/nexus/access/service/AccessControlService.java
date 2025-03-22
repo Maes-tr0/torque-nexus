@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ua.torque.nexus.access.exception.UnsupportedRoleTypeException;
 import ua.torque.nexus.access.model.Permission;
 import ua.torque.nexus.access.model.PermissionType;
 import ua.torque.nexus.access.model.Role;
@@ -28,14 +29,16 @@ public class AccessControlService {
     @Transactional
     public void initializeRolesAndPermissions() {
         for (PermissionType permType : PermissionType.values()) {
-            permissionRepository.findByName(permType.name())
-                    .orElseGet(() -> permissionRepository.save(
-                            Permission.builder()
-                                    .name(permType.name())
-                                    .description(permType.getDescription())
-                                    .build()
-                    ));
+            if (!permissionRepository.findByName(permType.name())) {
+                permissionRepository.save(
+                        Permission.builder()
+                                .name(permType.name())
+                                .description(permType.getDescription())
+                                .build()
+                );
+            }
         }
+
 
         for (RoleType roleType : RoleType.values()) {
             Role role = roleRepository.findByName(roleType.name())
@@ -45,12 +48,13 @@ public class AccessControlService {
                                     .build()
                     ));
 
-            if (roleType == RoleType.ADMIN) {
-                role.setPermissions(new HashSet<>(permissionRepository.findAll()));
-            } else if (roleType == RoleType.CUSTOMER) {
-                role.setPermissions(new HashSet<>(permissionRepository.customerPermission()));
-            } else {
-                throw new RuntimeException("Unsupported role type: " + roleType);
+            switch (roleType) {
+                case RoleType.ADMIN ->
+                        role.setPermissions(new HashSet<>(permissionRepository.findAll()));
+                case RoleType.CUSTOMER ->
+                        role.setPermissions(new HashSet<>(permissionRepository.customerPermission()));
+                default ->
+                        throw new UnsupportedRoleTypeException("Unsupported role type: " + roleType);
             }
 
             roleRepository.save(role);
