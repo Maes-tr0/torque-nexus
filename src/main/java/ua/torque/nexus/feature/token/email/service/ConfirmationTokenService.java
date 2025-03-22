@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ua.torque.nexus.feature.token.email.exception.EmailAlreadyConfirmedException;
 import ua.torque.nexus.feature.token.email.exception.TokenExpiredException;
 import ua.torque.nexus.feature.token.email.exception.TokenNotFoundException;
 import ua.torque.nexus.feature.token.email.model.ConfirmationToken;
@@ -55,8 +56,14 @@ public class ConfirmationTokenService {
             throw new TokenExpiredException(token.getToken());
         }
 
+        User user = token.getUser();
+
+        if (user.isEmailConfirmed()) {
+            throw new EmailAlreadyConfirmedException("Email is verified");
+        }
+
         token.setConfirmedAt(LocalDateTime.now());
-        token.getUser().setEmailConfirmed(true);
+        user.setEmailConfirmed(true);
 
         return confirmationTokenRepository.save(token);
     }

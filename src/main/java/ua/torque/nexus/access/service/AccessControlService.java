@@ -29,13 +29,14 @@ public class AccessControlService {
     @Transactional
     public void initializeRolesAndPermissions() {
         for (PermissionType permType : PermissionType.values()) {
-            if (!permissionRepository.findByName(permType.name())) {
+            if (!permissionRepository.existsByName(permType.name())) {
                 permissionRepository.save(
                         Permission.builder()
                                 .name(permType.name())
                                 .description(permType.getDescription())
                                 .build()
                 );
+                log.info("Created permission {}", permType.name());
             }
         }
 

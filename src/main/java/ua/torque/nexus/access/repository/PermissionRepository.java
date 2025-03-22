@@ -9,8 +9,9 @@ import java.util.List;
 
 @Transactional(readOnly = true)
 public interface PermissionRepository extends JpaRepository<Permission, Long> {
-    boolean findByName(String name);
 
     @Query("SELECT p FROM Permission p WHERE p.name IN ('CHANGE_PASSWORD', 'DELETE_ACCOUNT', 'UPDATE_PASSWORD')")
     List<Permission> customerPermission();
+
+    boolean existsByName(String name);
 }
