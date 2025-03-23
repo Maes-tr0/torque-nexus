@@ -54,4 +54,12 @@ public class Role {
             inverseJoinColumns = @JoinColumn(name = "permission_id")
     )
     private Set<Permission> permissions = new HashSet<>();
+
+    public static Role getDefaultRole() {
+        return Role.builder()
+                .id(1L)
+                .name("CUSTOMER")
+                .permissions(new HashSet<>())
+                .build();
+    }
 }

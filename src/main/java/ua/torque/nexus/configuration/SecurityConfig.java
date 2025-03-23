@@ -15,11 +15,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(
                                 "/api/v1/auth/register",
-                                "/api/v1/auth/reset-password",
-                                "api/v1/auth/confirm"
+                                "/api/v1/auth/reset-password"
                         ).permitAll()
-                        .anyRequest()
-                        .authenticated()
+                        .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults());
 

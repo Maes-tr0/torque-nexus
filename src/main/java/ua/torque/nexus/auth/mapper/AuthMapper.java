@@ -5,7 +5,6 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import ua.torque.nexus.auth.dto.RegistrationRequest;
 import ua.torque.nexus.auth.dto.RegistrationResponse;
-import ua.torque.nexus.auth.dto.ResetPasswordRequest;
 import ua.torque.nexus.auth.dto.ResetPasswordResponse;
 import ua.torque.nexus.user.model.User;
 
@@ -16,8 +15,6 @@ public interface AuthMapper {
 
     @Mapping(target = "message", constant = "Registration successful — please confirm your email")
     RegistrationResponse toRegistrationResponse(User user);
-
-    User resetPasswordRequestToUser(ResetPasswordRequest resetPasswordRequest);
 
     @Mapping(target = "message", constant="Password successful changed")
     ResetPasswordResponse userToResetPasswordResponse(User user);

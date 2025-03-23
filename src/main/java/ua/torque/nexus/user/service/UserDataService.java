@@ -47,6 +47,8 @@ public class UserDataService {
             log.info("User saved successfully: {}", user.getEmail());
 
             return confirmationTokenService.generateTokenForUser(user);
+        } catch (UserAlreadyRegisteredException ex) {
+            throw ex;
         } catch (Exception e) {
             log.error("Error saving user: {}", user.getEmail());
             throw new UserSaveException(
