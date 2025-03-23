@@ -15,6 +15,7 @@ import ua.torque.nexus.access.repository.RoleRepository;
 import ua.torque.nexus.user.model.User;
 
 import java.util.HashSet;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -55,7 +56,10 @@ public class AccessControlService {
                 case RoleType.CUSTOMER ->
                         role.setPermissions(new HashSet<>(permissionRepository.customerPermission()));
                 default ->
-                        throw new UnsupportedRoleTypeException("Unsupported role type: " + roleType);
+                        throw new UnsupportedRoleTypeException(
+                                "Unsupported role type: " + roleType,
+                                Map.of("unsupportedRoleType", roleType.name())
+                        );
             }
 
             roleRepository.save(role);

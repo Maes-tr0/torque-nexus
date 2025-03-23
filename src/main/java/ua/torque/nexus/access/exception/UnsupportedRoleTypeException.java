@@ -1,7 +1,17 @@
 package ua.torque.nexus.access.exception;
 
-public class UnsupportedRoleTypeException extends RuntimeException {
+import ua.torque.nexus.common.exception.ApplicationException;
+import ua.torque.nexus.common.exception.ExceptionType;
+
+import java.util.Map;
+
+public class UnsupportedRoleTypeException extends ApplicationException {
+
     public UnsupportedRoleTypeException(String message) {
-        super(message);
+        super(ExceptionType.UNSUPPORTED_ROLE_TYPE, message);
+    }
+
+    public UnsupportedRoleTypeException(String message, Map<String, Object> details) {
+        super(ExceptionType.UNSUPPORTED_ROLE_TYPE, message, details);
     }
 }

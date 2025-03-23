@@ -2,8 +2,8 @@ package ua.torque.nexus.feature.token.email.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
-import ua.torque.nexus.user.model.User;
 import ua.torque.nexus.feature.token.email.model.ConfirmationToken;
+import ua.torque.nexus.user.model.User;
 
 import java.time.LocalDateTime;
 import java.util.List;

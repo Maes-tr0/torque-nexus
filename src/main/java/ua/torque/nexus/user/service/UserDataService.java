@@ -1,7 +1,5 @@
 package ua.torque.nexus.user.service;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +19,8 @@ import ua.torque.nexus.user.exception.UserNotFoundException;
 import ua.torque.nexus.user.model.User;
 import ua.torque.nexus.user.repository.UserRepository;
 
+import java.util.Map;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -33,7 +33,7 @@ public class UserDataService {
     private final ConfirmationTokenService confirmationTokenService;
 
     @Transactional
-    public ConfirmationToken saveNewUser(User user) {
+    public ConfirmationToken saveNewUser(@NotNull User user) {
         try {
             if (userRepository.findByEmail(user.getEmail()).isPresent()) {
                 throw new UserAlreadyRegisteredException("User already registered: " + user.getEmail());
@@ -49,36 +49,49 @@ public class UserDataService {
             return confirmationTokenService.generateTokenForUser(user);
         } catch (Exception e) {
             log.error("Error saving user: {}", user.getEmail());
-            throw new UserSaveException("Failed to save user");
+            throw new UserSaveException(
+                    "Failed to save user: " + user.getEmail(),
+                    Map.of(
+                            "cause", e.getClass().getSimpleName(),
+                            "message", e.getMessage()
+                    )
+            );
         }
     }
 
     @Transactional
     public void updatePasswordUser(User user, String newPassword) {
+        if (userRepository.findByEmail(user.getEmail()).isEmpty()) {
+            log.warn("User not found: {}", user.getEmail());
+            throw new UserNotFoundException("User not found: " + user.getEmail());
+        }
+
+        if (!user.isEmailConfirmed()) {
+            log.warn("User is not confirmed: {}", user.getEmail());
+            throw new EmailNotConfirmedException("User is not confirmed: " + user.getEmail());
+        }
+
+        if (isSamePassword(user, newPassword)) {
+            log.warn("Attempt to update password with the same value for user: {}", user.getEmail());
+            throw new SamePasswordException("New password must be different from the old password");
+        }
+
         try {
-            if (userRepository.findByEmail(user.getEmail()).isEmpty()) {
-                log.warn("User not found: {}", user.getEmail());
-                throw new UserNotFoundException("User not found: " + user.getEmail());
-            }
-
-            if (!user.isEmailConfirmed()) {
-                log.warn("User is not confirmed: {}", user.getEmail());
-                throw new EmailNotConfirmedException("User is not confirmed: " + user.getEmail());
-            }
-
-            if (isSamePassword(user, newPassword)) {
-                log.warn("Attempt to update password with the same value for user: {}", user.getEmail());
-                throw new SamePasswordException("New password must be different from the old password");
-            }
-
             user.setPassword(passwordEncoder.encode(newPassword));
             userRepository.save(user);
             log.info("Password updated successfully for user: {}", user.getEmail());
         } catch (Exception e) {
-            log.error("Error updating password for user: {}", user.getEmail());
-            throw new PasswordUpdateException("Failed to update password");
+            log.error("Error updating password for user: {}", user.getEmail(), e);
+            throw new PasswordUpdateException(
+                    "Failed to update password for user: " + user.getEmail(),
+                    Map.of(
+                            "cause", e.getClass().getSimpleName(),
+                            "message", e.getMessage()
+                    )
+            );
         }
     }
+
 
     private boolean isSamePassword(User user, String newPassword) {
         log.info("Checking password match: raw='{}', storedHash='{}'", newPassword, user.getPassword());
