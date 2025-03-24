@@ -12,21 +12,4 @@ public enum RoleType {
     ADMIN("Admin");
 
     private final String displayName;
-
-    public static RoleType fromString(String roleName){
-        if(roleName == null){
-            log.warn("Role name is null, defaulting to 'CUSTOMER'");
-            return CUSTOMER;
-        }
-
-        for(RoleType role : RoleType.values()){
-            if(role.displayName.equals(roleName)){
-                log.debug("Matched roleName '{}' to enum Role '{}'", roleName, role);
-                return role;
-            }
-        }
-
-        log.error("Unknown role '{}' passed to fromString()", roleName);
-        throw new IllegalArgumentException("Invalid roleName '" + roleName + "'");
-    }
 }

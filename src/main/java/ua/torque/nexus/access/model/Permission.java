@@ -2,6 +2,8 @@ package ua.torque.nexus.access.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -13,11 +15,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.NaturalId;
 
 @Data
 @NoArgsConstructor
-@Builder
 @AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "permissions")
 public class Permission {
@@ -35,8 +38,10 @@ public class Permission {
     @Column(updatable = false, nullable = false)
     private Long id;
 
+    @Enumerated(EnumType.STRING)
+    @NaturalId
     @Column(nullable = false, unique = true)
-    private String name;
+    private PermissionType type;
 
     @Column
     private String description;

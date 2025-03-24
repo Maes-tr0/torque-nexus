@@ -14,8 +14,8 @@ import ua.torque.nexus.access.repository.PermissionRepository;
 import ua.torque.nexus.access.repository.RoleRepository;
 import ua.torque.nexus.user.model.User;
 
-import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -25,54 +25,52 @@ public class AccessControlService {
 
     private final PermissionRepository permissionRepository;
     private final RoleRepository roleRepository;
+    private final Set<Permission> defaultAdminPermissions;
+    private final Set<Permission> defaultUserPermissions;
 
     @PostConstruct
     @Transactional
     public void initializeRolesAndPermissions() {
         for (PermissionType permType : PermissionType.values()) {
-            if (!permissionRepository.existsByName(permType.name())) {
+            if (!permissionRepository.existsByType(permType)) {
                 permissionRepository.save(
                         Permission.builder()
-                                .name(permType.name())
+                                .type(permType)
                                 .description(permType.getDescription())
                                 .build()
                 );
-                log.info("Created permission {}", permType.name());
+                log.info("Created permission {}", permType);
             }
         }
 
-
         for (RoleType roleType : RoleType.values()) {
-            Role role = roleRepository.findByName(roleType.name())
+            Role role = roleRepository.findByType(roleType)
                     .orElseGet(() -> roleRepository.save(
                             Role.builder()
-                                    .name(roleType.name())
+                                    .type(roleType)
                                     .build()
                     ));
 
             switch (roleType) {
-                case RoleType.ADMIN ->
-                        role.setPermissions(new HashSet<>(permissionRepository.findAll()));
-                case RoleType.CUSTOMER ->
-                        role.setPermissions(new HashSet<>(permissionRepository.customerPermission()));
-                default ->
-                        throw new UnsupportedRoleTypeException(
-                                "Unsupported role type: " + roleType,
-                                Map.of("unsupportedRoleType", roleType.name())
-                        );
+                case ADMIN -> role.setPermissions(defaultAdminPermissions);
+                case CUSTOMER -> role.setPermissions(defaultUserPermissions);
+                default -> throw new UnsupportedRoleTypeException(
+                        "Unsupported role type: " + roleType,
+                        Map.of("unsupportedRoleType", roleType.name())
+                );
             }
 
             roleRepository.save(role);
-            log.info("Initialized role '{}' with permissions {}", role.getName(), role.getPermissions());
+            log.info("Initialized role '{}' with permissions {}", role.getType(), role.getPermissions());
         }
     }
 
     @Transactional
     public void assignRoleToUser(User user, RoleType roleType) {
-        Role persistedRole = roleRepository.findByName(roleType.name())
+        Role persistedRole = roleRepository.findByType(roleType)
                 .orElseThrow(() -> new RuntimeException("Role not found: " + roleType.name()));
 
         user.setRole(persistedRole);
-        log.info("Assigned role '{}' to user {}", persistedRole.getName(), user.getEmail());
+        log.info("Assigned role '{}' to user {}", persistedRole.getType().name(), user.getEmail());
     }
 }

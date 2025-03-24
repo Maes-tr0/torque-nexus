@@ -55,12 +55,14 @@ public class ConfirmationTokenService {
         }
 
         User user = token.getUser();
+
         if (user.isEmailConfirmed()) {
             throw new EmailAlreadyConfirmedException("Email is already confirmed for user: " + user.getEmail());
         }
 
         try {
             token.setConfirmedAt(LocalDateTime.now());
+
             user.setEmailConfirmed(true);
             return confirmationTokenRepository.save(token);
         } catch (Exception e) {

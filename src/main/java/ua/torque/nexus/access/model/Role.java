@@ -2,6 +2,8 @@ package ua.torque.nexus.access.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -18,6 +20,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.NaturalId;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -44,8 +47,10 @@ public class Role {
     @Column(updatable = false, nullable = false)
     private Long id;
 
+    @Enumerated(EnumType.STRING)
+    @NaturalId
     @Column(nullable = false, unique = true)
-    private String name;
+    private RoleType type;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -54,12 +59,4 @@ public class Role {
             inverseJoinColumns = @JoinColumn(name = "permission_id")
     )
     private Set<Permission> permissions = new HashSet<>();
-
-    public static Role getDefaultRole() {
-        return Role.builder()
-                .id(1L)
-                .name("CUSTOMER")
-                .permissions(new HashSet<>())
-                .build();
-    }
 }

@@ -9,14 +9,14 @@ CREATE SEQUENCE IF NOT EXISTS seq_permission_id
 CREATE TABLE IF NOT EXISTS roles
 (
     id   BIGINT       NOT NULL,
-    name VARCHAR(255) NOT NULL UNIQUE,
+    type VARCHAR(255) NOT NULL UNIQUE,
     CONSTRAINT pk_roles PRIMARY KEY (id)
 );
 
 CREATE TABLE IF NOT EXISTS permissions
 (
     id          BIGINT       NOT NULL,
-    name        VARCHAR(255) NOT NULL UNIQUE,
+    type        VARCHAR(255) NOT NULL UNIQUE,
     description VARCHAR(255),
     CONSTRAINT pk_permissions PRIMARY KEY (id)
 );
