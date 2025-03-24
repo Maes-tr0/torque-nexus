@@ -1,6 +1,5 @@
 package ua.torque.nexus.user.service;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
@@ -60,12 +59,12 @@ public class UserDataService implements UserDetailsService {
     }
 
     @Transactional
-    public ConfirmationToken saveNewUser(@NotNull User user) {
-        try {
-            if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-                throw new UserAlreadyRegisteredException("User already registered: " + user.getEmail());
-            }
+    public ConfirmationToken saveNewUser(User user) {
+        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+            throw new UserAlreadyRegisteredException("User already registered: " + user.getEmail());
+        }
 
+        try {
             accessControlService.assignRoleToUser(user, RoleType.CUSTOMER);
 
             user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -94,7 +93,7 @@ public class UserDataService implements UserDetailsService {
             throw new EmailNotConfirmedException("User is not confirmed: " + user.getEmail());
         }
 
-        if (isSamePassword(user, newPassword)) {
+        if (isSamePassword(user.getPassword(), newPassword)) {
             log.warn("Attempt to update password with the same value for user: {}", user.getEmail());
             throw new SamePasswordException("New password must be different from the old password");
         }
@@ -121,9 +120,9 @@ public class UserDataService implements UserDetailsService {
                 .orElseThrow(() -> new UserNotFoundException("User not found: " + email));
     }
 
-    private boolean isSamePassword(User user, String newPassword) {
-        log.info("Checking password match: raw='{}', storedHash='{}'", newPassword, user.getPassword());
+    private boolean isSamePassword(String existPassword, String newPassword) {
+        log.info("Checking password match: raw='{}', storedHash='{}'", newPassword, existPassword);
 
-        return passwordEncoder.matches(newPassword, user.getPassword());
+        return passwordEncoder.matches(newPassword, existPassword);
     }
 }
