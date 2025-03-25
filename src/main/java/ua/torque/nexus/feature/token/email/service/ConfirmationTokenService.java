@@ -77,7 +77,7 @@ public class ConfirmationTokenService {
     }
 
     @Transactional
-    @Scheduled(cron = "@midnight")
+    @Scheduled(cron = "* * 0 3 * *")
     public void deleteExpiredTokens() {
         List<ConfirmationToken> expiredTokens =
                 confirmationTokenRepository.findAllByExpiresAtBefore(LocalDateTime.now());

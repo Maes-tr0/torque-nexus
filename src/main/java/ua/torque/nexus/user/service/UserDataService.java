@@ -2,6 +2,7 @@ package ua.torque.nexus.user.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,7 +26,9 @@ import ua.torque.nexus.user.exception.UserNotFoundException;
 import ua.torque.nexus.user.model.User;
 import ua.torque.nexus.user.repository.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -133,5 +136,15 @@ public class UserDataService implements UserDetailsService {
         log.info("Checking password match: raw='{}', storedHash='{}'", newPassword, existPassword);
 
         return passwordEncoder.matches(newPassword, existPassword);
+    }
+
+    @Transactional
+    @Scheduled(cron = "* * 23 * * *")
+    public void deleteExpiredTokens() {
+        List<User> usersNotConfirmAndTokenExpired =
+                userRepository.findAllByEmailConfirmedFalseAndConfirmationTokenExpiresAtBefore(LocalDateTime.now());
+
+        userRepository.deleteAll(usersNotConfirmAndTokenExpired);
+        log.info("Deleted {} expired confirmation tokens", usersNotConfirmAndTokenExpired.size());
     }
 }
