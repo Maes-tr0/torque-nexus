@@ -9,6 +9,10 @@ import org.junit.jupiter.api.Test;
 import ua.torque.nexus.access.model.Role;
 import ua.torque.nexus.access.model.RoleType;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("User Model — Validation & Behavior")
@@ -127,5 +131,91 @@ class UserModelTest {
         User u2 = createValidUser();
         u2.setEmail("other@example.com");
         assertThat(u1).isNotEqualTo(u2);
+    }
+
+    @Test
+    void noArgsConstructorShouldBePublicAndInitializeDefaults() throws Exception {
+        Constructor<User> ctor = User.class.getDeclaredConstructor();
+        assertThat(Modifier.isPublic(ctor.getModifiers())).isTrue();
+
+        User u = ctor.newInstance();
+
+        assertThat(u.getId()).isNull();
+        assertThat(u.isEmailConfirmed()).isFalse();
+        assertThat(u.getCreated()).isNull();
+        assertThat(u.getUpdated()).isNull();
+    }
+
+    @Test
+    void builderSetsAllFieldsExceptIdAndTimestamps() {
+        User u = User.builder()
+                .fullName("John Doe")
+                .email("john@example.com")
+                .password("Secret123")
+                .phoneNumber("+380501234567")
+                .build();
+
+        assertThat(u.getFullName()).isEqualTo("John Doe");
+        assertThat(u.getEmail()).isEqualTo("john@example.com");
+        assertThat(u.getPassword()).isEqualTo("Secret123");
+        assertThat(u.getPhoneNumber()).isEqualTo("+380501234567");
+        assertThat(u.getRole()).isNull();
+        assertThat(u.getId()).isNull();
+        assertThat(u.getCreated()).isNull();
+        assertThat(u.getUpdated()).isNull();
+    }
+
+    @Test
+    void setIdShouldBePrivate() throws Exception {
+        Method setter = User.class.getDeclaredMethod("setId", Long.class);
+        assertThat(Modifier.isPrivate(setter.getModifiers())).isTrue();
+
+        // verify reflection can still set it
+        setter.setAccessible(true);
+        User u = new User();
+        setter.invoke(u, 123L);
+        assertThat(u.getId()).isEqualTo(123L);
+    }
+
+    @Test
+    void toStringDoesNotIncludePassword() {
+        User u = User.builder()
+                .fullName("Jane Roe")
+                .email("jane@domain.com")
+                .password("TopSecret")
+                .build();
+
+        String repr = u.toString();
+        assertThat(repr).doesNotContain("password")
+                .contains("fullName=Jane Roe")
+                .contains("email=jane@domain.com");
+    }
+
+    @Test
+    void equalsAndHashCode_withNullAndDifferentClass() {
+        User u = User.builder()
+                .fullName("Foo Bar")
+                .email("foo@bar.com")
+                .password("pwd")
+                .build();
+
+        assertThat(u)
+                .isEqualTo(u)
+                .isNotEqualTo(null)
+                .isNotEqualTo("some string");
+
+        User other = User.builder()
+                .fullName("Foo Bar")
+                .email("foo@bar.com")
+                .password("pwd2")
+                .build();
+        assertThat(u).isEqualTo(other).hasSameHashCodeAs(other);
+
+        User diffEmail = User.builder()
+                .fullName("Foo Bar")
+                .email("different@bar.com")
+                .password("pwd")
+                .build();
+        assertThat(u).isNotEqualTo(diffEmail);
     }
 }

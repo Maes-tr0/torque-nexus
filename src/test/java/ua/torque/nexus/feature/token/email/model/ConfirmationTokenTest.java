@@ -3,11 +3,25 @@ package ua.torque.nexus.feature.token.email.model;
 import org.junit.jupiter.api.Test;
 import ua.torque.nexus.user.model.User;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ConfirmationTokenTest {
+
+    @Test
+    void setIdShouldBePrivate() throws Exception {
+        Method setter = ConfirmationToken.class.getDeclaredMethod("setId", Long.class);
+        assertThat(Modifier.isPrivate(setter.getModifiers())).isTrue();
+
+        // verify reflection can still set it
+        setter.setAccessible(true);
+        ConfirmationToken u = new ConfirmationToken();
+        setter.invoke(u, 123L);
+        assertThat(u.getId()).isEqualTo(123L);
+    }
 
     @Test
     void builderShouldSetFieldsCorrectly() {
@@ -69,8 +83,7 @@ class ConfirmationTokenTest {
 
         token2.setConfirmedAt(now.plusMinutes(45));
 
-        assertThat(token1).isEqualTo(token2);
-        assertThat(token1.hashCode()).isEqualTo(token2.hashCode());
+        assertThat(token1).isEqualTo(token2).hasSameHashCodeAs(token2);
         ConfirmationToken token3 = ConfirmationToken.builder()
                 .token("different")
                 .createdAt(now)
