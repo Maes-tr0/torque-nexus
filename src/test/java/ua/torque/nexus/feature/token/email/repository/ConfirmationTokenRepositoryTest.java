@@ -1,21 +1,21 @@
 package ua.torque.nexus.feature.token.email.repository;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
-import java.time.LocalDateTime;
-import java.util.Optional;
-
-import jakarta.transaction.Transactional;
 import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.TestPropertySource;
-import ua.torque.nexus.feature.token.email.model.ConfirmationToken;
-import ua.torque.nexus.user.model.User;
 import ua.torque.nexus.access.model.Role;
 import ua.torque.nexus.access.model.RoleType;
+import ua.torque.nexus.feature.token.email.model.ConfirmationToken;
+import ua.torque.nexus.user.model.User;
+
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 @Transactional
@@ -33,13 +33,25 @@ class ConfirmationTokenRepositoryTest {
     private EntityManager entityManager;
 
     private Role createRole(RoleType type) {
+        Role existing = entityManager
+                .createQuery("SELECT r FROM Role r WHERE r.type = :type", Role.class)
+                .setParameter("type", type)
+                .getResultStream()
+                .findFirst()
+                .orElse(null);
+
+        if (existing != null) {
+            return existing;
+        }
+
         Role role = Role.builder()
                 .type(type)
-                .permissions(new java.util.HashSet<>())
+                .permissions(new HashSet<>())
                 .build();
         entityManager.persist(role);
         return role;
     }
+
 
     private User createUser(String email) {
         Role role = createRole(RoleType.CUSTOMER);

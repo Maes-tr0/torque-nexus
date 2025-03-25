@@ -59,8 +59,6 @@ class ConfirmationEmailDtoTest {
         ConfirmationEmailRequest r1 = ConfirmationEmailRequest.builder().token("abc").build();
         ConfirmationEmailRequest r2 = ConfirmationEmailRequest.builder().token("abc").build();
         ConfirmationEmailRequest r3 = ConfirmationEmailRequest.builder().token("xyz").build();
-        assertThat(r1).isEqualTo(r2);
-        assertThat(r1.hashCode()).isEqualTo(r2.hashCode());
-        assertThat(r1).isNotEqualTo(r3);
+        assertThat(r1).isEqualTo(r2).hasSameHashCodeAs(r2).isNotEqualTo(r3);
     }
 }

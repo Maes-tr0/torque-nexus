@@ -13,12 +13,13 @@ import ua.torque.nexus.access.model.RoleType;
 import ua.torque.nexus.access.service.AccessControlService;
 import ua.torque.nexus.feature.token.email.model.ConfirmationToken;
 import ua.torque.nexus.feature.token.email.service.ConfirmationTokenService;
-import ua.torque.nexus.user.exception.UserAlreadyRegisteredException;
+import ua.torque.nexus.user.exception.UserAlreadyRegisteredWithActiveTokenException;
 import ua.torque.nexus.user.model.User;
 import ua.torque.nexus.user.repository.UserRepository;
 
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -28,16 +29,12 @@ class UserDataServiceSaveNewUserTest {
 
     @Mock
     private UserRepository userRepository;
-
     @Mock
     private ConfirmationTokenService confirmationTokenService;
-
     @Mock
     private AccessControlService accessControlService;
-
     @Mock
     private PasswordEncoder passwordEncoder;
-
     @InjectMocks
     private UserDataService userDataService;
 
@@ -53,22 +50,36 @@ class UserDataServiceSaveNewUserTest {
     }
 
     @Test
-    void whenEmailAlreadyExists_thenThrowUserAlreadyRegisteredException() {
+    void whenEmailAlreadyExistsAndTokenNotExpired_thenThrowException() {
         when(userRepository.findByEmail(testUser.getEmail())).thenReturn(Optional.of(testUser));
+        when(confirmationTokenService.isTokenExpired(testUser)).thenReturn(false);
 
-        UserAlreadyRegisteredException ex = assertThrows(
-                UserAlreadyRegisteredException.class,
-                () -> userDataService.saveNewUser(testUser)
-        );
+        assertThrows(UserAlreadyRegisteredWithActiveTokenException.class,
+                () -> userDataService.saveNewUser(testUser));
 
-        assertTrue(ex.getMessage().contains(testUser.getEmail()));
         verify(passwordEncoder, never()).encode(any());
         verify(userRepository, never()).save(any());
         verify(confirmationTokenService, never()).generateTokenForUser(any());
     }
 
     @Test
-    void whenValidNewUser_thenReturnConfirmationToken() {
+    void whenEmailAlreadyExistsAndTokenExpired_thenGenerateNewToken() {
+        when(userRepository.findByEmail(testUser.getEmail())).thenReturn(Optional.of(testUser));
+        when(confirmationTokenService.isTokenExpired(testUser)).thenReturn(true);
+
+        ConfirmationToken token = new ConfirmationToken();
+        when(confirmationTokenService.generateTokenForUser(testUser)).thenReturn(token);
+
+        ConfirmationToken result = userDataService.saveNewUser(testUser);
+
+        assertSame(token, result);
+        verify(accessControlService, never()).assignRoleToUser(any(), any());
+        verify(userRepository, never()).save(any());
+        verify(confirmationTokenService).generateTokenForUser(testUser);
+    }
+
+    @Test
+    void whenValidNewUser_thenAssignRoleEncodeSaveAndGenerateToken() {
         when(userRepository.findByEmail(testUser.getEmail())).thenReturn(Optional.empty());
         when(passwordEncoder.encode(testUser.getPassword())).thenReturn("encodedPassword");
         when(userRepository.save(testUser)).thenReturn(testUser);
@@ -76,9 +87,9 @@ class UserDataServiceSaveNewUserTest {
         ConfirmationToken token = new ConfirmationToken();
         when(confirmationTokenService.generateTokenForUser(testUser)).thenReturn(token);
 
-        ConfirmationToken actual = userDataService.saveNewUser(testUser);
+        ConfirmationToken result = userDataService.saveNewUser(testUser);
 
-        assertSame(token, actual);
+        assertSame(token, result);
         assertEquals("encodedPassword", testUser.getPassword());
         verify(accessControlService).assignRoleToUser(testUser, RoleType.CUSTOMER);
         verify(userRepository).save(testUser);
@@ -91,12 +102,10 @@ class UserDataServiceSaveNewUserTest {
         when(passwordEncoder.encode(testUser.getPassword())).thenReturn("encodedPassword");
         when(userRepository.save(testUser)).thenThrow(new RuntimeException("DB error"));
 
-        UserSaveException ex = assertThrows(
-                UserSaveException.class,
-                () -> userDataService.saveNewUser(testUser)
-        );
+        assertThatThrownBy(() -> userDataService.saveNewUser(testUser))
+                .isInstanceOf(UserSaveException.class)
+                .hasMessageContaining(testUser.getEmail());
 
-        assertTrue(ex.getMessage().contains(testUser.getEmail()));
         verify(confirmationTokenService, never()).generateTokenForUser(any());
     }
 }

@@ -3,10 +3,7 @@ package ua.torque.nexus.access.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
 import ua.torque.nexus.access.model.Permission;
 import ua.torque.nexus.access.model.PermissionType;
 import ua.torque.nexus.access.model.Role;
@@ -15,97 +12,86 @@ import ua.torque.nexus.access.repository.PermissionRepository;
 import ua.torque.nexus.access.repository.RoleRepository;
 import ua.torque.nexus.user.model.User;
 
-import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
 class AccessControlServiceTest {
 
     private PermissionRepository permissionRepository;
     private RoleRepository roleRepository;
-
-    private AccessControlService authService;
+    private AccessControlService service;
 
     @BeforeEach
     void setUp() {
-        permissionRepository = org.mockito.Mockito.mock(PermissionRepository.class);
-        roleRepository = org.mockito.Mockito.mock(RoleRepository.class);
+        permissionRepository = mock(PermissionRepository.class);
+        roleRepository = mock(RoleRepository.class);
 
-        Set<Permission> defaultAdminPermissions = new HashSet<>();
-        defaultAdminPermissions.add(Permission.builder()
-                .type(PermissionType.REGISTER)
-                .description("Registration permission")
-                .build());
-        defaultAdminPermissions.add(Permission.builder()
-                .type(PermissionType.LOGIN)
-                .description("Login permission")
-                .build());
+        var adminPerms = Set.of(
+                Permission.builder().type(PermissionType.REGISTER).description("desc").build(),
+                Permission.builder().type(PermissionType.LOGIN).description("desc").build()
+        );
+        var userPerms = Set.of(
+                Permission.builder().type(PermissionType.LOGIN).description("desc").build()
+        );
 
-        Set<Permission> defaultUserPermissions = new HashSet<>();
-        defaultUserPermissions.add(Permission.builder()
-                .type(PermissionType.LOGIN)
-                .description("Login permission")
-                .build());
-
-        authService = new AccessControlService(permissionRepository, roleRepository, defaultAdminPermissions, defaultUserPermissions);
-
-        MockitoAnnotations.openMocks(this);
+        service = new AccessControlService(permissionRepository, roleRepository, adminPerms, userPerms);
     }
 
     @Test
-    void initializeRolesAndPermissions_whenRepositoriesEmpty_thenCreateEntities() {
-        for (PermissionType permType : PermissionType.values()) {
-            when(permissionRepository.existsByType(permType)).thenReturn(false);
-            when(permissionRepository.save(any(Permission.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        }
+    void initializeRoles_createsMissingPermissionsAndRoles() {
+        when(permissionRepository.existsByType(any())).thenReturn(false);
+        when(permissionRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+        when(roleRepository.findByType(any())).thenReturn(Optional.empty());
+        when(roleRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-        for (RoleType roleType : RoleType.values()) {
-            when(roleRepository.findByType(roleType)).thenReturn(Optional.empty());
-            when(roleRepository.save(any(Role.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        }
+        service.initializeRolesAndPermissions();
 
-        authService.initializeRolesAndPermissions();
+        verify(permissionRepository, times(PermissionType.values().length)).save(any());
 
-        for (PermissionType permType : PermissionType.values()) {
-            verify(permissionRepository).existsByType(permType);
-        }
-
-        for (RoleType roleType : RoleType.values()) {
-            verify(roleRepository).findByType(roleType);
+        for (RoleType type : RoleType.values()) {
+            verify(roleRepository).findByType(type);
+            verify(roleRepository, times(2))
+                    .save(argThat(role -> role.getType() == type));
         }
     }
 
+
     @Test
-    void assignRoleToUser_whenRoleExists_thenAssignRole() {
+    void initializeRoles_skipsExistingPermissionAndUpdatesRolePermissions() {
+        when(permissionRepository.existsByType(any())).thenReturn(true);
+        Role existing = Role.builder().type(RoleType.CUSTOMER).build();
+        when(roleRepository.findByType(RoleType.CUSTOMER)).thenReturn(Optional.of(existing));
+        when(roleRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+        service.initializeRolesAndPermissions();
+
+        verify(permissionRepository, never()).save(any());
+        assertThat(existing.getPermissions()).isNotEmpty();
+        verify(roleRepository).save(existing);
+    }
+
+    @Test
+    void assignRoleToUser_assignsWhenFound() {
         User user = new User();
-        user.setEmail("john.doe@example.com");
+        Role r = Role.builder().type(RoleType.ADMIN).build();
+        when(roleRepository.findByType(RoleType.ADMIN)).thenReturn(Optional.of(r));
 
-        Role adminRole = Role.builder().type(RoleType.ADMIN).build();
-        when(roleRepository.findByType(RoleType.ADMIN)).thenReturn(Optional.of(adminRole));
+        service.assignRoleToUser(user, RoleType.ADMIN);
 
-        authService.assignRoleToUser(user, RoleType.ADMIN);
-
-        assertThat(user.getRole()).isEqualTo(adminRole);
-        verify(roleRepository).findByType(RoleType.ADMIN);
+        assertThat(user.getRole()).isEqualTo(r);
     }
 
     @Test
-    void assignRoleToUser_whenRoleNotFound_thenThrowException() {
+    void assignRoleToUser_throwsWhenMissing() {
         User user = new User();
-        user.setEmail("jane.doe@example.com");
-
         when(roleRepository.findByType(RoleType.CUSTOMER)).thenReturn(Optional.empty());
 
-        Exception exception = assertThrows(RuntimeException.class, () ->
-                authService.assignRoleToUser(user, RoleType.CUSTOMER)
-        );
-        assertThat(exception.getMessage()).contains("Role not found");
+        assertThatThrownBy(() -> service.assignRoleToUser(user, RoleType.CUSTOMER))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("Role not found");
     }
 }

@@ -45,8 +45,7 @@ class ErrorResponseDtoTest {
                 .details(details)
                 .timestamp(timestamp)
                 .build();
-        assertThat(dto1).isEqualTo(dto2);
-        assertThat(dto1.hashCode()).isEqualTo(dto2.hashCode());
+        assertThat(dto1).isEqualTo(dto2).hasSameHashCodeAs(dto2);
     }
 
     @Test
