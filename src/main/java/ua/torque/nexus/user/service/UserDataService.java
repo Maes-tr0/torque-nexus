@@ -20,12 +20,14 @@ import ua.torque.nexus.feature.token.email.service.ConfirmationTokenService;
 import ua.torque.nexus.user.exception.EmailNotConfirmedException;
 import ua.torque.nexus.user.exception.SamePasswordException;
 import ua.torque.nexus.user.exception.UserAlreadyRegisteredException;
+import ua.torque.nexus.user.exception.UserAlreadyRegisteredWithActiveTokenException;
 import ua.torque.nexus.user.exception.UserNotFoundException;
 import ua.torque.nexus.user.model.User;
 import ua.torque.nexus.user.repository.UserRepository;
 
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 @Slf4j
@@ -60,31 +62,26 @@ public class UserDataService implements UserDetailsService {
 
     @Transactional
     public ConfirmationToken saveNewUser(User user) {
-        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            throw new UserAlreadyRegisteredException("User already registered: " + user.getEmail());
+        Optional<User> existingUser = userRepository.findByEmail(user.getEmail());
+        if (existingUser.isPresent()) {
+            return processExistingUser(existingUser.get());
         }
 
         try {
             accessControlService.assignRoleToUser(user, RoleType.CUSTOMER);
-
             user.setPassword(passwordEncoder.encode(user.getPassword()));
-
             userRepository.save(user);
             log.info("User saved successfully: {}", user.getEmail());
-
             return confirmationTokenService.generateTokenForUser(user);
-
         } catch (Exception e) {
-            log.error("Error saving user: {}", user.getEmail());
+            log.error("Error saving user: {}", user.getEmail(), e);
             throw new UserSaveException(
                     "Failed to save user: " + user.getEmail(),
-                    Map.of(
-                            "cause", e.getClass().getSimpleName(),
-                            "message", e.getMessage()
-                    )
+                    Map.of("cause", e.getClass().getSimpleName(), "message", e.getMessage())
             );
         }
     }
+
 
     @Transactional
     public void updatePasswordUser(User user, String newPassword) {
@@ -118,6 +115,18 @@ public class UserDataService implements UserDetailsService {
     public User getUserByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("User not found: " + email));
+    }
+
+    private ConfirmationToken processExistingUser(User existingUser) {
+        if (!confirmationTokenService.isTokenExpired(existingUser)) {
+            log.warn("Attempt to register already registered user with active token: {}", existingUser.getEmail());
+            throw new UserAlreadyRegisteredWithActiveTokenException(
+                    "User already registered and confirmation token is still active: " + existingUser.getEmail()
+            );
+        } else {
+            log.info("Existing user's token expired. Generating new token for email: {}", existingUser.getEmail());
+            return confirmationTokenService.generateTokenForUser(existingUser);
+        }
     }
 
     private boolean isSamePassword(String existPassword, String newPassword) {
