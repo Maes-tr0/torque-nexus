@@ -2,9 +2,9 @@ package ua.torque.nexus.auth.mapper;
 
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
-import ua.torque.nexus.auth.dto.RegistrationRequest;
-import ua.torque.nexus.auth.dto.RegistrationResponse;
-import ua.torque.nexus.auth.dto.ResetPasswordResponse;
+import ua.torque.nexus.auth.dto.request.RegistrationRequest;
+import ua.torque.nexus.auth.dto.response.RegistrationResponse;
+import ua.torque.nexus.auth.dto.response.ResetPasswordResponse;
 import ua.torque.nexus.user.model.User;
 
 import static org.assertj.core.api.Assertions.assertThat;

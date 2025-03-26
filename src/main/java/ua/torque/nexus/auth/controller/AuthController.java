@@ -9,10 +9,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ua.torque.nexus.auth.dto.RegistrationRequest;
-import ua.torque.nexus.auth.dto.RegistrationResponse;
-import ua.torque.nexus.auth.dto.ResetPasswordRequest;
-import ua.torque.nexus.auth.dto.ResetPasswordResponse;
+import ua.torque.nexus.auth.dto.request.LoginRequest;
+import ua.torque.nexus.auth.dto.request.RegistrationRequest;
+import ua.torque.nexus.auth.dto.response.LoginResponse;
+import ua.torque.nexus.auth.dto.response.RegistrationResponse;
+import ua.torque.nexus.auth.dto.request.ResetPasswordRequest;
+import ua.torque.nexus.auth.dto.response.ResetPasswordResponse;
 import ua.torque.nexus.auth.service.AuthService;
 
 @Slf4j
@@ -36,12 +38,24 @@ public class AuthController {
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<ResetPasswordResponse> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+    public ResponseEntity<ResetPasswordResponse> resetPassword(@RequestBody @Valid ResetPasswordRequest request) {
         log.info("Received reset password request for email: {}", request.getEmail());
 
         ResetPasswordResponse response = authService.resetPassword(request);
 
         log.info("Password reset process initiated successfully for email: {}", response.email());
+        return ResponseEntity
+                .status(HttpStatus.ACCEPTED)
+                .body(response);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(@RequestBody @Valid LoginRequest request) {
+        log.info("Received login request for email: {}", request.getEmail());
+
+        LoginResponse response = authService.login(request);
+
+        log.info("User logged in successfully with email: {}", response.email());
         return ResponseEntity
                 .status(HttpStatus.ACCEPTED)
                 .body(response);

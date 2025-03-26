@@ -1,4 +1,4 @@
-package ua.torque.nexus.auth.dto;
+package ua.torque.nexus.auth.dto.response;
 
 import lombok.Builder;
 

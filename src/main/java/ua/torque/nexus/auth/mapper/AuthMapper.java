@@ -3,9 +3,9 @@ package ua.torque.nexus.auth.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
-import ua.torque.nexus.auth.dto.RegistrationRequest;
-import ua.torque.nexus.auth.dto.RegistrationResponse;
-import ua.torque.nexus.auth.dto.ResetPasswordResponse;
+import ua.torque.nexus.auth.dto.request.RegistrationRequest;
+import ua.torque.nexus.auth.dto.response.RegistrationResponse;
+import ua.torque.nexus.auth.dto.response.ResetPasswordResponse;
 import ua.torque.nexus.user.model.User;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)

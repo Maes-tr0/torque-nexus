@@ -6,6 +6,8 @@ import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import ua.torque.nexus.auth.dto.request.RegistrationRequest;
+import ua.torque.nexus.auth.dto.request.ResetPasswordRequest;
 
 import java.util.Set;
 

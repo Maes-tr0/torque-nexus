@@ -4,10 +4,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ua.torque.nexus.auth.dto.RegistrationRequest;
-import ua.torque.nexus.auth.dto.RegistrationResponse;
-import ua.torque.nexus.auth.dto.ResetPasswordRequest;
-import ua.torque.nexus.auth.dto.ResetPasswordResponse;
+import ua.torque.nexus.auth.dto.request.LoginRequest;
+import ua.torque.nexus.auth.dto.request.RegistrationRequest;
+import ua.torque.nexus.auth.dto.response.LoginResponse;
+import ua.torque.nexus.auth.dto.response.RegistrationResponse;
+import ua.torque.nexus.auth.dto.request.ResetPasswordRequest;
+import ua.torque.nexus.auth.dto.response.ResetPasswordResponse;
 import ua.torque.nexus.auth.mapper.AuthMapper;
 import ua.torque.nexus.feature.token.email.model.ConfirmationToken;
 import ua.torque.nexus.user.model.User;
@@ -52,5 +54,19 @@ public class AuthService {
         log.info("ResetPassword response generated for email: {}", user.getEmail());
 
         return response;
+    }
+
+    public LoginResponse login(@Valid LoginRequest request) {
+        log.info("Processing login for user: {}", request.getEmail());
+
+        String token = userDataService.loginUser(request.getEmail(), request.getPassword());
+
+        log.info("Successfully generated JWT token for user: {}", request.getEmail());
+
+        return LoginResponse.builder()
+                .email(request.getEmail())
+                .token(token)
+                .message("Successfully generated JWT token for user")
+                .build();
     }
 }

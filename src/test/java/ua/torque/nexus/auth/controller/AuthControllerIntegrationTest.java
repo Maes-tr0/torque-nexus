@@ -10,10 +10,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import ua.torque.nexus.auth.dto.RegistrationRequest;
-import ua.torque.nexus.auth.dto.RegistrationResponse;
-import ua.torque.nexus.auth.dto.ResetPasswordRequest;
-import ua.torque.nexus.auth.dto.ResetPasswordResponse;
+import ua.torque.nexus.auth.dto.request.RegistrationRequest;
+import ua.torque.nexus.auth.dto.response.RegistrationResponse;
+import ua.torque.nexus.auth.dto.request.ResetPasswordRequest;
+import ua.torque.nexus.auth.dto.response.ResetPasswordResponse;
 import ua.torque.nexus.auth.service.AuthService;
 
 import static org.mockito.ArgumentMatchers.any;

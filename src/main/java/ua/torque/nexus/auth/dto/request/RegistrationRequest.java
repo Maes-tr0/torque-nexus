@@ -1,4 +1,4 @@
-package ua.torque.nexus.auth.dto;
+package ua.torque.nexus.auth.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

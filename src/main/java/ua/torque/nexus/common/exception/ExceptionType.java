@@ -38,7 +38,9 @@ public enum ExceptionType {
     MULTIPLE_FIELDS_INVALID(
             "Multiple fields are invalid", HttpStatus.BAD_REQUEST),
     USER_SAVE_FAILED(
-            "Failed to save user", HttpStatus.INTERNAL_SERVER_ERROR);
+            "Failed to save user", HttpStatus.INTERNAL_SERVER_ERROR),
+    INVALID_CREDENTIALS(
+            "Invalid credentials provided", HttpStatus.UNAUTHORIZED);
 
     private final String message;
     private final HttpStatus httpStatus;

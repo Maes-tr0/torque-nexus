@@ -17,6 +17,8 @@ import ua.torque.nexus.access.model.RoleType;
 import ua.torque.nexus.access.service.AccessControlService;
 import ua.torque.nexus.feature.token.email.model.ConfirmationToken;
 import ua.torque.nexus.feature.token.email.service.ConfirmationTokenService;
+import ua.torque.nexus.security.JwtTokenService;
+import ua.torque.nexus.user.exception.InvalidCredentialsException;
 import ua.torque.nexus.user.exception.SamePasswordException;
 import ua.torque.nexus.user.exception.UserAlreadyExistsAndConfirmedException;
 import ua.torque.nexus.user.exception.UserAlreadyExistsButUnconfirmedException;
@@ -39,6 +41,7 @@ public class UserDataService implements UserDetailsService {
     private final AccessControlService accessControlService;
     private final PasswordEncoder passwordEncoder;
     private final ConfirmationTokenService confirmationTokenService;
+    private final JwtTokenService jwtTokenService;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -118,9 +121,31 @@ public class UserDataService implements UserDetailsService {
                 .orElseThrow(() -> new UserNotFoundException(email));
     }
 
-    private boolean isSamePassword(String existPassword, String newPassword) {
+    protected boolean isSamePassword(String existPassword, String newPassword) {
         log.info("Checking password match: raw='{}', storedHash='{}'", newPassword, existPassword);
 
         return passwordEncoder.matches(newPassword, existPassword);
     }
+
+    public String loginUser(String email, String password) {
+        log.info("Attempting to log in user with email: {}", email);
+
+        User userByEmail = getUserByEmail(email);
+        log.debug("User with email '{}' found in DB, checking confirmation status...", email);
+
+        if (!userByEmail.isEmailConfirmed()) {
+            log.warn("User with email '{}' is not confirmed. Throwing exception.", email);
+            throw new UserNotFoundException(email);
+        }
+
+        log.debug("Checking password for user '{}'", email);
+        if (!isSamePassword(userByEmail.getPassword(), password)) {
+            log.warn("Invalid credentials provided for user '{}'. Throwing exception.", email);
+            throw new InvalidCredentialsException();
+        }
+
+        log.info("User with email '{}' successfully logged in. Generating token...", email);
+        return jwtTokenService.generateTokenForUser(userByEmail);
+    }
+
 }
