@@ -11,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import ua.torque.nexus.access.exception.PasswordUpdateException;
 import ua.torque.nexus.user.exception.EmailNotConfirmedException;
 import ua.torque.nexus.user.exception.SamePasswordException;
+import ua.torque.nexus.user.exception.UserNotFoundException;
 import ua.torque.nexus.user.model.User;
 import ua.torque.nexus.user.repository.UserRepository;
 
@@ -47,7 +48,7 @@ class UserDataServiceUpdatePasswordUserTest {
         testUser.setEmailConfirmed(false);
 
         var ex = assertThrows(
-                EmailNotConfirmedException.class,
+                UserNotFoundException.class,
                 () -> userDataService.updatePasswordUser(testUser, "NewPassword123")
         );
 
