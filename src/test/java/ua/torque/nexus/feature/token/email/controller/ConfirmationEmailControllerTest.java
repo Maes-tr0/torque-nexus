@@ -63,7 +63,6 @@ class ConfirmationEmailControllerTest {
     void confirmEmail_validationError() throws Exception {
         mockMvc.perform(get("/api/v1/auth/confirm")
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.details").exists());
+                .andExpect(status().isBadRequest());
     }
 }

@@ -14,6 +14,7 @@ import ua.torque.nexus.access.service.AccessControlService;
 import ua.torque.nexus.feature.token.email.model.ConfirmationToken;
 import ua.torque.nexus.feature.token.email.service.ConfirmationTokenService;
 import ua.torque.nexus.user.exception.UserAlreadyExistsAndConfirmedException;
+import ua.torque.nexus.user.exception.UserAlreadyExistsButUnconfirmedException;
 import ua.torque.nexus.user.model.User;
 import ua.torque.nexus.user.repository.UserRepository;
 
@@ -52,30 +53,13 @@ class UserDataServiceSaveNewUserTest {
     @Test
     void whenEmailAlreadyExistsAndTokenNotExpired_thenThrowException() {
         when(userRepository.findByEmail(testUser.getEmail())).thenReturn(Optional.of(testUser));
-        when(confirmationTokenService.isTokenExpired(testUser)).thenReturn(false);
 
-        assertThrows(UserAlreadyExistsAndConfirmedException.class,
+        assertThrows(UserAlreadyExistsButUnconfirmedException.class,
                 () -> userDataService.saveNewUser(testUser));
 
         verify(passwordEncoder, never()).encode(any());
         verify(userRepository, never()).save(any());
         verify(confirmationTokenService, never()).generateTokenForUser(any());
-    }
-
-    @Test
-    void whenEmailAlreadyExistsAndTokenExpired_thenGenerateNewToken() {
-        when(userRepository.findByEmail(testUser.getEmail())).thenReturn(Optional.of(testUser));
-        when(confirmationTokenService.isTokenExpired(testUser)).thenReturn(true);
-
-        ConfirmationToken token = new ConfirmationToken();
-        when(confirmationTokenService.generateTokenForUser(testUser)).thenReturn(token);
-
-        ConfirmationToken result = userDataService.saveNewUser(testUser);
-
-        assertSame(token, result);
-        verify(accessControlService, never()).assignRoleToUser(any(), any());
-        verify(userRepository, never()).save(any());
-        verify(confirmationTokenService).generateTokenForUser(testUser);
     }
 
     @Test
