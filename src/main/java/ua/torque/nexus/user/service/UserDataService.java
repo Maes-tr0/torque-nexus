@@ -2,7 +2,6 @@ package ua.torque.nexus.user.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,15 +19,13 @@ import ua.torque.nexus.feature.token.email.model.ConfirmationToken;
 import ua.torque.nexus.feature.token.email.service.ConfirmationTokenService;
 import ua.torque.nexus.user.exception.EmailNotConfirmedException;
 import ua.torque.nexus.user.exception.SamePasswordException;
-import ua.torque.nexus.user.exception.UserAlreadyRegisteredException;
-import ua.torque.nexus.user.exception.UserAlreadyRegisteredWithActiveTokenException;
+import ua.torque.nexus.user.exception.UserAlreadyExistsAndConfirmedException;
+import ua.torque.nexus.user.exception.UserAlreadyExistsButUnconfirmedException;
 import ua.torque.nexus.user.exception.UserNotFoundException;
 import ua.torque.nexus.user.model.User;
 import ua.torque.nexus.user.repository.UserRepository;
 
-import java.time.LocalDateTime;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -67,7 +64,10 @@ public class UserDataService implements UserDetailsService {
     public ConfirmationToken saveNewUser(User user) {
         Optional<User> existingUser = userRepository.findByEmail(user.getEmail());
         if (existingUser.isPresent()) {
-            return processExistingUser(existingUser.get());
+            if (!existingUser.get().isEmailConfirmed()) {
+                throw new UserAlreadyExistsButUnconfirmedException(user.getEmail());
+            }
+            throw new UserAlreadyExistsAndConfirmedException(user.getEmail());
         }
 
         try {
@@ -85,17 +85,16 @@ public class UserDataService implements UserDetailsService {
         }
     }
 
-
     @Transactional
     public void updatePasswordUser(User user, String newPassword) {
         if (!user.isEmailConfirmed()) {
             log.warn("User is not confirmed: {}", user.getEmail());
-            throw new EmailNotConfirmedException("User is not confirmed: " + user.getEmail());
+            throw new UserNotFoundException(user.getEmail());
         }
 
         if (isSamePassword(user.getPassword(), newPassword)) {
             log.warn("Attempt to update password with the same value for user: {}", user.getEmail());
-            throw new SamePasswordException("New password must be different from the old password");
+            throw new SamePasswordException();
         }
 
         try {
@@ -117,34 +116,12 @@ public class UserDataService implements UserDetailsService {
 
     public User getUserByEmail(String email) {
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("User not found: " + email));
-    }
-
-    private ConfirmationToken processExistingUser(User existingUser) {
-        if (!confirmationTokenService.isTokenExpired(existingUser)) {
-            log.warn("Attempt to register already registered user with active token: {}", existingUser.getEmail());
-            throw new UserAlreadyRegisteredWithActiveTokenException(
-                    "User already registered and confirmation token is still active: " + existingUser.getEmail()
-            );
-        } else {
-            log.info("Existing user's token expired. Generating new token for email: {}", existingUser.getEmail());
-            return confirmationTokenService.generateTokenForUser(existingUser);
-        }
+                .orElseThrow(() -> new UserNotFoundException(email));
     }
 
     private boolean isSamePassword(String existPassword, String newPassword) {
         log.info("Checking password match: raw='{}', storedHash='{}'", newPassword, existPassword);
 
         return passwordEncoder.matches(newPassword, existPassword);
-    }
-
-    @Transactional
-    @Scheduled(cron = "* * 23 * * *")
-    public void deleteExpiredTokens() {
-        List<User> usersNotConfirmAndTokenExpired =
-                userRepository.findAllByEmailConfirmedFalseAndConfirmationTokenExpiresAtBefore(LocalDateTime.now());
-
-        userRepository.deleteAll(usersNotConfirmAndTokenExpired);
-        log.info("Deleted {} expired confirmation tokens", usersNotConfirmAndTokenExpired.size());
     }
 }

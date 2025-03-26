@@ -10,7 +10,8 @@ CREATE TABLE IF NOT EXISTS confirmation_tokens
     expired_at   TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     confirmed_at TIMESTAMP WITHOUT TIME ZONE,
     user_id      BIGINT                      NOT NULL,
-    CONSTRAINT pk_confirmation_tokens PRIMARY KEY (id)
+    CONSTRAINT pk_confirmation_tokens PRIMARY KEY (id),
+    CONSTRAINT fk_tokens_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
 
 CREATE INDEX IF NOT EXISTS idx_confirmation_token ON confirmation_tokens (token);

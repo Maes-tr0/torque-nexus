@@ -13,7 +13,7 @@ import ua.torque.nexus.access.model.RoleType;
 import ua.torque.nexus.access.service.AccessControlService;
 import ua.torque.nexus.feature.token.email.model.ConfirmationToken;
 import ua.torque.nexus.feature.token.email.service.ConfirmationTokenService;
-import ua.torque.nexus.user.exception.UserAlreadyRegisteredWithActiveTokenException;
+import ua.torque.nexus.user.exception.UserAlreadyExistsAndConfirmedException;
 import ua.torque.nexus.user.model.User;
 import ua.torque.nexus.user.repository.UserRepository;
 
@@ -54,7 +54,7 @@ class UserDataServiceSaveNewUserTest {
         when(userRepository.findByEmail(testUser.getEmail())).thenReturn(Optional.of(testUser));
         when(confirmationTokenService.isTokenExpired(testUser)).thenReturn(false);
 
-        assertThrows(UserAlreadyRegisteredWithActiveTokenException.class,
+        assertThrows(UserAlreadyExistsAndConfirmedException.class,
                 () -> userDataService.saveNewUser(testUser));
 
         verify(passwordEncoder, never()).encode(any());
