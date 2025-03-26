@@ -17,7 +17,6 @@ import ua.torque.nexus.access.model.RoleType;
 import ua.torque.nexus.access.service.AccessControlService;
 import ua.torque.nexus.feature.token.email.model.ConfirmationToken;
 import ua.torque.nexus.feature.token.email.service.ConfirmationTokenService;
-import ua.torque.nexus.user.exception.EmailNotConfirmedException;
 import ua.torque.nexus.user.exception.SamePasswordException;
 import ua.torque.nexus.user.exception.UserAlreadyExistsAndConfirmedException;
 import ua.torque.nexus.user.exception.UserAlreadyExistsButUnconfirmedException;
