@@ -15,6 +15,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import ua.torque.nexus.user.model.User;
 
 import java.time.LocalDateTime;
@@ -53,6 +55,7 @@ public class ConfirmationToken {
 
     @OneToOne
     @JoinColumn(nullable = false, name = "user_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private User user;
 
     @Builder

@@ -2,7 +2,6 @@ package ua.torque.nexus.feature.token.email.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ua.torque.nexus.access.exception.UserSaveException;
@@ -14,7 +13,6 @@ import ua.torque.nexus.feature.token.email.repository.ConfirmationTokenRepositor
 import ua.torque.nexus.user.model.User;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -76,15 +74,6 @@ public class ConfirmationTokenService {
         }
     }
 
-    @Transactional
-    @Scheduled(cron = "* * 0 3 * *")
-    public void deleteExpiredTokens() {
-        List<ConfirmationToken> expiredTokens =
-                confirmationTokenRepository.findAllByExpiresAtBefore(LocalDateTime.now());
-
-        confirmationTokenRepository.deleteAll(expiredTokens);
-        log.info("Deleted {} expired confirmation tokens", expiredTokens.size());
-    }
 
     public boolean isTokenExpired(User user) {
         return confirmationTokenRepository.findByUser(user)

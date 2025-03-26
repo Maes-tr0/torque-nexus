@@ -29,7 +29,7 @@ public enum ExceptionType {
             "New password must be different from the old password", HttpStatus.BAD_REQUEST),
     USER_ALREADY_REGISTERED(
             "User is already registered", HttpStatus.CONFLICT),
-    USER_ALREADY_REGISTERED_WITH_ACTIVE_TOKEN(
+    USER_ALREADY_EXISTS(
             "User already registered and confirmation token is still active", HttpStatus.CONFLICT),
     PASSWORD_UPDATE_FAILED(
             "Failed to update password", HttpStatus.INTERNAL_SERVER_ERROR),
