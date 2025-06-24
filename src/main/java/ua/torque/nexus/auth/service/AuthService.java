@@ -9,7 +9,6 @@ import ua.torque.nexus.auth.dto.RegistrationResponse;
 import ua.torque.nexus.auth.dto.ResetPasswordRequest;
 import ua.torque.nexus.auth.dto.ResetPasswordResponse;
 import ua.torque.nexus.auth.mapper.AuthMapper;
-import ua.torque.nexus.feature.token.email.model.ConfirmationToken;
 import ua.torque.nexus.user.model.User;
 import ua.torque.nexus.user.service.UserDataService;
 
@@ -22,35 +21,41 @@ public class AuthService {
     private final AuthMapper authMapper;
 
     public RegistrationResponse registerUser(@Valid RegistrationRequest request) {
-        log.info("Processing registration for email: {}", request.getEmail());
+        log.info("Registration request received for email: {}", request.getEmail());
 
         User user = authMapper.registrationRequestToUser(request);
+        log.debug("Mapped registration request to User: {}", user);
 
-        ConfirmationToken token = userDataService.saveNewUser(user);
-        log.info("User saved with email: {}", user.getEmail());
+        String token = userDataService.saveNewUser(user);
+        log.info("User {} registered successfully. Token generated: {}", user.getEmail(), token);
 
-        RegistrationResponse base = authMapper.toRegistrationResponse(user);
         RegistrationResponse response = RegistrationResponse.builder()
-                .email(base.email())
-                .message(base.message())
-                .token(token.getToken())
+                .email(user.getEmail())
+                .token(token)
+                .message("Registration successful — please confirm your email")
                 .build();
-        log.info("Registration response generated for email: {}", user.getEmail());
+        log.info("Registration response created for email: {}", user.getEmail());
 
         return response;
     }
 
     public ResetPasswordResponse resetPassword(@Valid ResetPasswordRequest request) {
-        log.info("Processing reset password for email: {}", request.getEmail());
+        log.info("Reset password request received for email: {}", request.getEmail());
 
-        User user = userDataService.getUserByEmail(request.getEmail());
+        User userByEmail = userDataService.getUserByEmail(request.getEmail());
+        log.debug("User retrieved for reset password: {}", userByEmail);
 
-        userDataService.updatePasswordUser(user, request.getNewPassword());
-        log.info("Password updated for user with email: {}", user.getEmail());
+        userDataService.updatePasswordUser(userByEmail, request.getNewPassword());
+        log.info("Password reset successfully for email: {}", request.getEmail());
 
-        ResetPasswordResponse response = authMapper.userToResetPasswordResponse(user);
-        log.info("ResetPassword response generated for email: {}", user.getEmail());
+        ResetPasswordResponse response = ResetPasswordResponse.builder()
+                .email(userByEmail.getEmail())
+                .message("Reset password successful")
+                .build();
+        log.info("Reset password response created for email: {}", userByEmail.getEmail());
 
         return response;
     }
+
+
 }
