@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ua.torque.nexus.auth.dto.request.LoginRequest;
 import ua.torque.nexus.auth.dto.request.RegistrationRequest;
+import ua.torque.nexus.auth.dto.request.ResetPasswordRequest;
 import ua.torque.nexus.auth.dto.response.LoginResponse;
 import ua.torque.nexus.auth.dto.response.RegistrationResponse;
-import ua.torque.nexus.auth.dto.request.ResetPasswordRequest;
 import ua.torque.nexus.auth.dto.response.ResetPasswordResponse;
 import ua.torque.nexus.auth.service.AuthService;
 

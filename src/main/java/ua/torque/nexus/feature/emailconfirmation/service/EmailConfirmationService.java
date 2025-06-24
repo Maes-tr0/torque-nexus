@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ua.torque.nexus.feature.emailconfirmation.exception.EmailAlreadyConfirmedException;
-import ua.torque.nexus.feature.token.JwtTokenService;
+import ua.torque.nexus.security.JwtTokenService;
 import ua.torque.nexus.user.model.User;
 import ua.torque.nexus.user.service.UserDataService;
 

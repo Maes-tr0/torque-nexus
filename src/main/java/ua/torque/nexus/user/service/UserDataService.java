@@ -16,8 +16,9 @@ import ua.torque.nexus.access.exception.UserSaveException;
 import ua.torque.nexus.access.model.role.Role;
 import ua.torque.nexus.access.model.role.RoleType;
 import ua.torque.nexus.access.service.AccessControlService;
-import ua.torque.nexus.feature.token.JwtTokenService;
+import ua.torque.nexus.security.JwtTokenService;
 import ua.torque.nexus.user.exception.EmailNotConfirmedException;
+import ua.torque.nexus.user.exception.InvalidCredentialsException;
 import ua.torque.nexus.user.exception.SamePasswordException;
 import ua.torque.nexus.user.exception.UserAlreadyExistsAndConfirmedException;
 import ua.torque.nexus.user.exception.UserAlreadyExistsButUnconfirmedException;
@@ -164,6 +165,7 @@ public class UserDataService implements UserDetailsService {
         }
 
         log.info("User with email '{}' successfully logged in. Generating token...", email);
+
         return jwtTokenService.generateTokenForUser(userByEmail);
     }
 

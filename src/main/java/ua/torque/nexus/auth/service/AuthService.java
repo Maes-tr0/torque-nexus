@@ -6,12 +6,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ua.torque.nexus.auth.dto.request.LoginRequest;
 import ua.torque.nexus.auth.dto.request.RegistrationRequest;
+import ua.torque.nexus.auth.dto.request.ResetPasswordRequest;
 import ua.torque.nexus.auth.dto.response.LoginResponse;
 import ua.torque.nexus.auth.dto.response.RegistrationResponse;
-import ua.torque.nexus.auth.dto.request.ResetPasswordRequest;
 import ua.torque.nexus.auth.dto.response.ResetPasswordResponse;
 import ua.torque.nexus.auth.mapper.AuthMapper;
-import ua.torque.nexus.feature.token.email.model.ConfirmationToken;
 import ua.torque.nexus.user.model.User;
 import ua.torque.nexus.user.service.UserDataService;
 
