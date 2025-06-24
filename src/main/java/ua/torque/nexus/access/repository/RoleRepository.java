@@ -2,8 +2,8 @@ package ua.torque.nexus.access.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
-import ua.torque.nexus.access.model.Role;
-import ua.torque.nexus.access.model.RoleType;
+import ua.torque.nexus.access.model.role.Role;
+import ua.torque.nexus.access.model.role.RoleType;
 
 import java.util.Optional;
 

@@ -3,8 +3,8 @@ package ua.torque.nexus.access.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import ua.torque.nexus.access.model.Permission;
-import ua.torque.nexus.access.model.PermissionType;
+import ua.torque.nexus.access.model.permission.Permission;
+import ua.torque.nexus.access.model.permission.PermissionType;
 import ua.torque.nexus.access.repository.PermissionRepository;
 
 import java.util.Arrays;
@@ -53,5 +53,4 @@ public class PermissionConfig {
         );
         return new HashSet<>(permissions);
     }
-
 }

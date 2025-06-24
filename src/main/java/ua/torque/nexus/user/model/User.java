@@ -22,7 +22,7 @@ import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import ua.torque.nexus.access.model.Role;
+import ua.torque.nexus.access.model.role.Role;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
