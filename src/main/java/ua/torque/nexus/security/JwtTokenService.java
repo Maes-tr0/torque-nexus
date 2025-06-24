@@ -14,7 +14,6 @@ import ua.torque.nexus.feature.emailconfirmation.exception.TokenNotFoundExceptio
 import ua.torque.nexus.user.model.User;
 
 import javax.crypto.SecretKey;
-import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 import java.util.Map;
@@ -37,26 +36,24 @@ public class JwtTokenService {
     private long expirationMs;
 
 
-    private Key getSigningKey() {
+    private SecretKey getKey() {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes());
     }
 
-    private SecretKey getKey() {
-        return Keys.hmacShaKeyFor(confirmationSecret.getBytes(StandardCharsets.UTF_8));
-    }
-
-
-    public String generateTokenForUser(User user) {
+    public String generateAuthorizationToken(User user) {
         final Date now = new Date();
         final Date expiryDate = new Date(now.getTime() + expirationMs);
 
-        return Jwts.builder()
+        String token = Jwts.builder()
                 .subject(user.getEmail())
                 .claim("role", user.getRole().toString())
                 .issuedAt(new Date())
                 .expiration(expiryDate)
-                .signWith(getSigningKey())
+                .signWith(getKey())
                 .compact();
+
+        log.info("Generated authorization token for user {}: {}", user.getEmail(), token);
+        return token;
     }
 
     public String generateConfirmationToken(User user) {
@@ -65,9 +62,9 @@ public class JwtTokenService {
 
         String token = Jwts.builder()
                 .subject(user.getEmail())
+                .claim("email", user.getEmail())
                 .issuedAt(now)
                 .expiration(expiryDate)
-                .claim("email", user.getEmail())
                 .signWith(getKey())
                 .compact();
 

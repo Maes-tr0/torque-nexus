@@ -155,7 +155,7 @@ public class UserDataService implements UserDetailsService {
 
         if (!userByEmail.isEmailConfirmed()) {
             log.warn("User with email '{}' is not confirmed. Throwing exception.", email);
-            throw new UserNotFoundException(email);
+            throw new EmailNotConfirmedException(email);
         }
 
         log.debug("Checking password for user '{}'", email);
@@ -166,7 +166,7 @@ public class UserDataService implements UserDetailsService {
 
         log.info("User with email '{}' successfully logged in. Generating token...", email);
 
-        return jwtTokenService.generateTokenForUser(userByEmail);
+        return jwtTokenService.generateAuthorizationToken(userByEmail);
     }
 
 }

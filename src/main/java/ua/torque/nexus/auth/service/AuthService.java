@@ -7,8 +7,7 @@ import org.springframework.stereotype.Service;
 import ua.torque.nexus.auth.dto.request.LoginRequest;
 import ua.torque.nexus.auth.dto.request.RegistrationRequest;
 import ua.torque.nexus.auth.dto.request.ResetPasswordRequest;
-import ua.torque.nexus.auth.dto.response.LoginResponse;
-import ua.torque.nexus.auth.dto.response.RegistrationResponse;
+import ua.torque.nexus.auth.dto.response.AuthResponse;
 import ua.torque.nexus.auth.dto.response.ResetPasswordResponse;
 import ua.torque.nexus.auth.mapper.AuthMapper;
 import ua.torque.nexus.user.model.User;
@@ -22,7 +21,7 @@ public class AuthService {
     private final UserDataService userDataService;
     private final AuthMapper authMapper;
 
-    public RegistrationResponse registerUser(@Valid RegistrationRequest request) {
+    public AuthResponse registerUser(@Valid RegistrationRequest request) {
         log.info("Registration request received for email: {}", request.getEmail());
 
         User user = authMapper.registrationRequestToUser(request);
@@ -31,7 +30,7 @@ public class AuthService {
         String token = userDataService.saveNewUser(user);
         log.info("User {} registered successfully. Token generated: {}", user.getEmail(), token);
 
-        RegistrationResponse response = RegistrationResponse.builder()
+        AuthResponse response = AuthResponse.builder()
                 .email(user.getEmail())
                 .token(token)
                 .message("Registration successful — please confirm your email")
@@ -59,14 +58,14 @@ public class AuthService {
         return response;
     }
 
-    public LoginResponse login(@Valid LoginRequest request) {
+    public AuthResponse login(@Valid LoginRequest request) {
         log.info("Processing login for user: {}", request.getEmail());
 
         String token = userDataService.loginUser(request.getEmail(), request.getPassword());
 
         log.info("Successfully generated JWT token for user: {}", request.getEmail());
 
-        return LoginResponse.builder()
+        return AuthResponse.builder()
                 .email(request.getEmail())
                 .token(token)
                 .message("Successfully generated JWT token for user")

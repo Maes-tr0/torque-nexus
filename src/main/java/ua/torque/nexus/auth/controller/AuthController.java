@@ -12,8 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ua.torque.nexus.auth.dto.request.LoginRequest;
 import ua.torque.nexus.auth.dto.request.RegistrationRequest;
 import ua.torque.nexus.auth.dto.request.ResetPasswordRequest;
-import ua.torque.nexus.auth.dto.response.LoginResponse;
-import ua.torque.nexus.auth.dto.response.RegistrationResponse;
+import ua.torque.nexus.auth.dto.response.AuthResponse;
 import ua.torque.nexus.auth.dto.response.ResetPasswordResponse;
 import ua.torque.nexus.auth.service.AuthService;
 
@@ -26,10 +25,10 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<RegistrationResponse> register(@RequestBody @Valid RegistrationRequest request) {
+    public ResponseEntity<AuthResponse> register(@RequestBody @Valid RegistrationRequest request) {
         log.info("Received registration request for email: {}", request.getEmail());
 
-        RegistrationResponse response = authService.registerUser(request);
+        AuthResponse response = authService.registerUser(request);
 
         log.info("User registered successfully with email: {}", response.email());
         return ResponseEntity
@@ -50,10 +49,10 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody @Valid LoginRequest request) {
+    public ResponseEntity<AuthResponse> login(@RequestBody @Valid LoginRequest request) {
         log.info("Received login request for email: {}", request.getEmail());
 
-        LoginResponse response = authService.login(request);
+        AuthResponse response = authService.login(request);
 
         log.info("User logged in successfully with email: {}", response.email());
         return ResponseEntity
