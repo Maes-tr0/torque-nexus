@@ -19,6 +19,7 @@ import ua.torque.nexus.access.model.role.RoleType;
 import ua.torque.nexus.access.service.AccessControlService;
 import ua.torque.nexus.feature.emailconfirmation.exception.EmailAlreadyConfirmedException;
 import ua.torque.nexus.feature.token.JwtTokenService;
+import ua.torque.nexus.user.exception.EmailNotConfirmedException;
 import ua.torque.nexus.user.exception.SamePasswordException;
 import ua.torque.nexus.user.exception.UserAlreadyExistsAndConfirmedException;
 import ua.torque.nexus.user.exception.UserAlreadyExistsButUnconfirmedException;
@@ -104,7 +105,7 @@ public class UserDataService implements UserDetailsService {
         log.info("Initiating password update for user: {}", user.getEmail());
         if (!user.isEmailConfirmed()) {
             log.warn("User is not confirmed: {}", user.getEmail());
-            throw new UserNotFoundException(user.getEmail());
+            throw new EmailNotConfirmedException(user.getEmail());
         }
 
         if (isSamePassword(user.getPassword(), newPassword)) {
