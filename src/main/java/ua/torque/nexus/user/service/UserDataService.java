@@ -3,6 +3,7 @@ package ua.torque.nexus.user.service;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -89,7 +90,7 @@ public class UserDataService implements UserDetailsService {
             String token = jwtTokenService.generateConfirmationToken(user);
             log.info("Confirmation token generated for user {}: {}", user.getEmail(), token);
             return token;
-        } catch (Exception e) {
+        } catch (DataAccessException e) {
             log.error("Error saving user: {}", user.getEmail(), e);
             throw new UserSaveException(
                     "Failed to save user: " + user.getEmail(),
@@ -117,29 +118,13 @@ public class UserDataService implements UserDetailsService {
 
             userRepository.save(user);
             log.info("Password updated successfully for user: {}", user.getEmail());
-        } catch (Exception e) {
+        } catch (DataAccessException e) {
             log.error("Error updating password for user: {}", user.getEmail(), e);
             throw new PasswordUpdateException(
                     "Failed to update password for user: " + user.getEmail(),
                     Map.of("cause", e.getClass().getSimpleName(), "message", e.getMessage())
             );
         }
-    }
-
-    @Transactional
-    public void confirmUserEmail(String token) {
-        Claims claims = jwtTokenService.validateToken(token);
-        String userEmail = claims.getSubject();
-        log.info("Token validated for user: {}", userEmail);
-
-        User user = getUserByEmail(userEmail);
-        if (user.isEmailConfirmed()) {
-            throw new EmailAlreadyConfirmedException("User email is already confirmed");
-        }
-
-        user.setEmailConfirmed(true);
-        userRepository.save(user);
-        log.info("User {} email confirmed", userEmail);
     }
 
     public User getUserByEmail(String email) {
