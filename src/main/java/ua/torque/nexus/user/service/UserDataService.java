@@ -1,6 +1,5 @@
 package ua.torque.nexus.user.service;
 
-import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
@@ -17,7 +16,6 @@ import ua.torque.nexus.access.exception.UserSaveException;
 import ua.torque.nexus.access.model.role.Role;
 import ua.torque.nexus.access.model.role.RoleType;
 import ua.torque.nexus.access.service.AccessControlService;
-import ua.torque.nexus.feature.emailconfirmation.exception.EmailAlreadyConfirmedException;
 import ua.torque.nexus.feature.token.JwtTokenService;
 import ua.torque.nexus.user.exception.EmailNotConfirmedException;
 import ua.torque.nexus.user.exception.SamePasswordException;
