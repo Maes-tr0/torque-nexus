@@ -36,6 +36,14 @@ public class AccessControlService {
     public void initializeRolesAndPermissions() {
         log.info("Starting initialization of roles and permissions...");
 
+        ensurePermissionsExist();
+        synchronizeRoles();
+
+        log.info("Initialization finished.");
+    }
+
+
+    private void ensurePermissionsExist() {
         Set<PermissionType> existingPermissionTypes = permissionRepository.findAll().stream()
                 .map(Permission::getType)
                 .collect(Collectors.toSet());
@@ -50,12 +58,16 @@ public class AccessControlService {
 
         if (!newPermissions.isEmpty()) {
             permissionRepository.saveAll(newPermissions);
-            newPermissions.forEach(permission ->
-                    log.info("Created permission: {}", permission.getType())
-            );
+            newPermissions.forEach(p -> log.info("Created permission: {}", p.getType()));
         } else {
-            log.info("All permission types already exist.");
+            log.info("All permission types already exist in the database.");
         }
+    }
+
+
+    private void synchronizeRoles() {
+        Map<PermissionType, Permission> allPermissionsMap = permissionRepository.findAll().stream()
+                .collect(Collectors.toMap(Permission::getType, Function.identity()));
 
         Map<RoleType, Role> existingRolesMap = roleRepository.findAll().stream()
                 .collect(Collectors.toMap(Role::getType, Function.identity()));
@@ -63,32 +75,30 @@ public class AccessControlService {
         List<Role> rolesToSave = Arrays.stream(RoleType.values())
                 .map(roleType -> {
                     Role role = existingRolesMap.getOrDefault(roleType, Role.builder().type(roleType).build());
+                    Set<PermissionType> requiredPermissionTypes = getPermissionTypesForRole(roleType);
 
-                    Set<Permission> permissionsToSet = getPermissionsForRole(roleType);
-
-                    role.setPermissions(permissionsToSet);
-
-                    Set<PermissionType> permissionTypesForLogging = permissionsToSet.stream()
-                            .map(Permission::getType)
+                    Set<Permission> permissionsToSet = requiredPermissionTypes.stream()
+                            .map(allPermissionsMap::get)
                             .collect(Collectors.toSet());
 
-                    log.info("Initializing role '{}' with permissions: {}", role.getType(), permissionTypesForLogging);
+                    role.setPermissions(permissionsToSet);
+                    log.info("Initializing role '{}' with permissions: {}", role.getType(), requiredPermissionTypes);
                     return role;
                 })
                 .toList();
 
         roleRepository.saveAll(rolesToSave);
         log.info("Successfully initialized {} roles.", rolesToSave.size());
-        log.info("Initialization finished.");
     }
 
 
-    private Set<Permission> getPermissionsForRole(RoleType roleType) {
+    private Set<PermissionType> getPermissionTypesForRole(RoleType roleType) {
         return switch (roleType) {
-            case ADMIN -> permissionConfig.defaultAdminPermissions();
-            case CUSTOMER -> permissionConfig.defaultUserPermissions();
+            case ADMIN -> permissionConfig.getDefaultAdminPermissionTypes();
+            case CUSTOMER -> permissionConfig.getDefaultUserPermissionTypes();
         };
     }
+
 
     @Transactional
     public void assignRoleToUser(User user, RoleType roleType) {
