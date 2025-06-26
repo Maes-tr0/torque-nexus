@@ -29,10 +29,10 @@ public class JwtTokenService {
     @Value("${jwt.confirmation.expiration-ms}")
     private long confirmationExpirationMs;
 
-    @Value("${jwt.authorization.secret}")
+    @Value("${jwt.auth.secret}")
     private String jwtSecret;
 
-    @Value("${jwt.authorization.expiration-ms}")
+    @Value("${jwt.auth.expiration-ms}")
     private long expirationMs;
 
 
@@ -44,10 +44,10 @@ public class JwtTokenService {
         final Date now = new Date();
         final Date expiryDate = new Date(now.getTime() + expirationMs);
 
-        String token = Jwts.builder()
+        final String token = Jwts.builder()
                 .subject(user.getEmail())
                 .claim("role", user.getRole().toString())
-                .issuedAt(new Date())
+                .issuedAt(now)
                 .expiration(expiryDate)
                 .signWith(getKey())
                 .compact();
@@ -57,10 +57,10 @@ public class JwtTokenService {
     }
 
     public String generateConfirmationToken(User user) {
-        Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + confirmationExpirationMs);
+        final Date now = new Date();
+        final Date expiryDate = new Date(now.getTime() + confirmationExpirationMs);
 
-        String token = Jwts.builder()
+        final String token = Jwts.builder()
                 .subject(user.getEmail())
                 .claim("email", user.getEmail())
                 .issuedAt(now)
