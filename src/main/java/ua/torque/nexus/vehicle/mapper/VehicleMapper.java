@@ -8,6 +8,5 @@ import ua.torque.nexus.vehicle.model.Vehicle;
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface VehicleMapper {
 
-
     Vehicle createVehicleRequestToVehicle(CreateVehicleRequest request);
 }

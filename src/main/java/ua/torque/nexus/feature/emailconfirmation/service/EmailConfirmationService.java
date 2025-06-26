@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ua.torque.nexus.feature.emailconfirmation.exception.EmailAlreadyConfirmedException;
 import ua.torque.nexus.security.JwtTokenService;
 import ua.torque.nexus.user.model.User;
-import ua.torque.nexus.user.service.UserDataService;
+import ua.torque.nexus.user.service.UserService;
 
 @Slf4j
 @Service
@@ -16,7 +16,7 @@ import ua.torque.nexus.user.service.UserDataService;
 public class EmailConfirmationService {
 
     private final JwtTokenService jwtTokenService;
-    private final UserDataService userDataService;
+    private final UserService userService;
 
     @Transactional
     public void confirmEmail(String token) {
@@ -24,12 +24,12 @@ public class EmailConfirmationService {
         String userEmail = claims.getSubject();
         log.info("Token validated for user: {}", userEmail);
 
-        User user = userDataService.getUserByEmail(userEmail);
+        User user = userService.getUserByEmail(userEmail);
         if (user.isEmailConfirmed()) {
             throw new EmailAlreadyConfirmedException("User email is already confirmed");
         }
 
-        userDataService.markAccountAsConfirmed(user);
+        userService.markAccountAsConfirmed(user);
         log.info("User {} email confirmed", userEmail);
     }
 }

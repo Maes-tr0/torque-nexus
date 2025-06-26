@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ua.torque.nexus.user.repository.UserRepository;
-import ua.torque.nexus.user.service.UserDataService;
+import ua.torque.nexus.user.service.UserService;
 import ua.torque.nexus.vehicle.dto.request.CreateVehicleRequest;
 import ua.torque.nexus.vehicle.dto.request.UpdateVehicleRequest;
 import ua.torque.nexus.vehicle.dto.response.VehicleResponse;
@@ -22,7 +22,7 @@ public class VehicleService {
     private final VehicleMapper vehicleMapper;
     private final VehicleRepository vehicleRepository;
     private final UserRepository userRepository;
-    private final UserDataService userService;
+    private final UserService userService;
 
 
     @Transactional

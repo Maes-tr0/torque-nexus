@@ -11,14 +11,14 @@ import ua.torque.nexus.auth.dto.response.AuthResponse;
 import ua.torque.nexus.auth.dto.response.ResetPasswordResponse;
 import ua.torque.nexus.auth.mapper.AuthMapper;
 import ua.torque.nexus.user.model.User;
-import ua.torque.nexus.user.service.UserDataService;
+import ua.torque.nexus.user.service.UserService;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
 
-    private final UserDataService userDataService;
+    private final UserService userService;
     private final AuthMapper authMapper;
 
     public AuthResponse registerUser(@Valid RegistrationRequest request) {
@@ -27,7 +27,7 @@ public class AuthService {
         User user = authMapper.registrationRequestToUser(request);
         log.debug("Mapped registration request to User: {}", user);
 
-        String token = userDataService.saveNewUser(user);
+        String token = userService.saveNewUser(user);
         log.info("User {} registered successfully. Token generated: {}", user.getEmail(), token);
 
         AuthResponse response = AuthResponse.builder()
@@ -43,10 +43,10 @@ public class AuthService {
     public ResetPasswordResponse resetPassword(@Valid ResetPasswordRequest request) {
         log.info("Reset password request received for email: {}", request.getEmail());
 
-        User userByEmail = userDataService.getUserByEmail(request.getEmail());
+        User userByEmail = userService.getUserByEmail(request.getEmail());
         log.debug("User retrieved for reset password: {}", userByEmail);
 
-        userDataService.updatePasswordUser(userByEmail, request.getNewPassword());
+        userService.updatePasswordUser(userByEmail, request.getNewPassword());
         log.info("Password reset successfully for email: {}", request.getEmail());
 
         ResetPasswordResponse response = ResetPasswordResponse.builder()
@@ -61,7 +61,7 @@ public class AuthService {
     public AuthResponse login(@Valid LoginRequest request) {
         log.info("Processing login for user: {}", request.getEmail());
 
-        String token = userDataService.loginUser(request.getEmail(), request.getPassword());
+        String token = userService.loginUser(request.getEmail(), request.getPassword());
 
         log.info("Successfully generated JWT token for user: {}", request.getEmail());
 
