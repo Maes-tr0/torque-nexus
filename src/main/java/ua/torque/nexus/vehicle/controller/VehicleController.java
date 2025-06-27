@@ -22,7 +22,7 @@ import ua.torque.nexus.vehicle.service.VehicleService;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/customer/vehicles")
+@RequestMapping("/api/v1/customer/vehicles")
 @RequiredArgsConstructor
 public class VehicleController {
 
@@ -30,7 +30,7 @@ public class VehicleController {
 
 
     @PostMapping
-    @PreAuthorize("hasAuthority('CREATE_VEHICLE')")
+    //@PreAuthorize("hasAuthority('CREATE_VEHICLE')")
     public ResponseEntity<VehicleResponse> createVehicle(
             @RequestBody @Valid CreateVehicleRequest createRequest,
             @AuthenticationPrincipal UserDetails userDetails) {

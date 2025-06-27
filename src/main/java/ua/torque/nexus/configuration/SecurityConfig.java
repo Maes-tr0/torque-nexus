@@ -20,8 +20,8 @@ public class SecurityConfig {
                                 "/api/v1/auth/confirm",
                                 "/api/v1/auth/login"
                         ).permitAll()
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/customer/**").hasRole("CUSTOMER")
+                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/customer/**").hasRole("CUSTOMER")
                         .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults());

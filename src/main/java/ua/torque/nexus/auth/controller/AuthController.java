@@ -26,37 +26,37 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@RequestBody @Valid RegistrationRequest request) {
-        log.info("Received registration request for email: {}", request.getEmail());
+        log.info("POST /register for email={}", request.getEmail());
 
-        AuthResponse response = authService.registerUser(request);
+        AuthResponse resp = authService.register(request);
+        log.info("<-Registration-> completed for email={}", resp.email());
 
-        log.info("User registered successfully with email: {}", response.email());
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(response);
+                .body(resp);
     }
 
     @PostMapping("/reset-password")
     public ResponseEntity<ResetPasswordResponse> resetPassword(@RequestBody @Valid ResetPasswordRequest request) {
-        log.info("Received reset password request for email: {}", request.getEmail());
+        log.info("POST /reset-password for email={}", request.getEmail());
 
-        ResetPasswordResponse response = authService.resetPassword(request);
+        ResetPasswordResponse resp = authService.resetPassword(request);
+        log.info("<-Password-reset> completed for email={}", resp.email());
 
-        log.info("Password reset process initiated successfully for email: {}", response.email());
         return ResponseEntity
                 .status(HttpStatus.ACCEPTED)
-                .body(response);
+                .body(resp);
     }
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody @Valid LoginRequest request) {
-        log.info("Received login request for email: {}", request.getEmail());
+        log.info("POST /login for email={}", request.getEmail());
 
-        AuthResponse response = authService.login(request);
+        AuthResponse resp = authService.login(request);
+        log.info("<-Login-> completed for email={}", resp.email());
 
-        log.info("User logged in successfully with email: {}", response.email());
         return ResponseEntity
                 .status(HttpStatus.ACCEPTED)
-                .body(response);
+                .body(resp);
     }
 }

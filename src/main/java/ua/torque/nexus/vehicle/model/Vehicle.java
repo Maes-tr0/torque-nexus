@@ -1,11 +1,20 @@
 package ua.torque.nexus.vehicle.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
@@ -14,14 +23,12 @@ import org.hibernate.annotations.UpdateTimestamp;
 import ua.torque.nexus.user.model.User;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Objects;
 
 @Data
 @NoArgsConstructor
 @Entity
-@ToString(exclude = "users")
-@EqualsAndHashCode(exclude = "users")
+@ToString(exclude = "user")
 @Table(name = "vehicles")
 public class Vehicle {
     @Id
@@ -57,8 +64,9 @@ public class Vehicle {
     @Column(nullable = false, unique = true, name = "license_plate")
     private String licensePlate;
 
-    @ManyToMany(mappedBy = "vehicles")
-    private Set<User> users = new HashSet<>();
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false, nullable = false)
@@ -67,4 +75,26 @@ public class Vehicle {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    @Builder
+    public Vehicle(String vinCode, String mark, String model, Integer year, String licensePlate) {
+        this.vinCode = vinCode;
+        this.mark = mark;
+        this.model = model;
+        this.year = year;
+        this.licensePlate = licensePlate;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Vehicle vehicle = (Vehicle) o;
+        return vinCode != null && vinCode.equals(vehicle.getVinCode());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(vinCode);
+    }
 }
