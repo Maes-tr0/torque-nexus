@@ -48,7 +48,6 @@ public class VehicleService {
     }
 
 
-
     public VehicleResponse updateVehicle(Long vehicleId, @Valid UpdateVehicleRequest updateRequest, String userEmail) {
         return null;
     }

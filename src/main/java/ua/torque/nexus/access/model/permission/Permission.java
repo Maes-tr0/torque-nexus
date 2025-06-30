@@ -9,18 +9,20 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.NaturalId;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode(of = "type")
 @Entity
 @Table(name = "permissions")
 public class Permission {
@@ -34,7 +36,6 @@ public class Permission {
             strategy = GenerationType.SEQUENCE,
             generator = "seq_permission"
     )
-    @Setter(AccessLevel.PRIVATE)
     @Column(updatable = false, nullable = false)
     private Long id;
 
@@ -42,7 +43,4 @@ public class Permission {
     @NaturalId
     @Column(nullable = false, unique = true)
     private PermissionType type;
-
-    @Column
-    private String description;
 }

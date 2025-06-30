@@ -24,7 +24,8 @@ ALTER TABLE vehicles
     ADD CONSTRAINT fk_vehicle_user
         FOREIGN KEY (user_id)
             REFERENCES users (id)
-            ON DELETE CASCADE; -- При видаленні користувача, його автомобілі також будуть видалені
+            ON DELETE CASCADE;
+-- При видаленні користувача, його автомобілі також будуть видалені
 
 -- Створення індексів для полів, за якими буде відбуватися пошук
 CREATE INDEX IF NOT EXISTS idx_vehicle_vin_code ON vehicles (vin_code);

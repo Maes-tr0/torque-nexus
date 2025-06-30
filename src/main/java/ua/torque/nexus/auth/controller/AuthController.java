@@ -28,35 +28,35 @@ public class AuthController {
     public ResponseEntity<AuthResponse> register(@RequestBody @Valid RegistrationRequest request) {
         log.info("POST /register for email={}", request.getEmail());
 
-        AuthResponse resp = authService.register(request);
-        log.info("<-Registration-> completed for email={}", resp.email());
+        AuthResponse response = authService.register(request);
+        log.info("<-Registration-> completed for email={}", response.email());
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(resp);
+                .body(response);
     }
 
     @PostMapping("/reset-password")
     public ResponseEntity<ResetPasswordResponse> resetPassword(@RequestBody @Valid ResetPasswordRequest request) {
         log.info("POST /reset-password for email={}", request.getEmail());
 
-        ResetPasswordResponse resp = authService.resetPassword(request);
-        log.info("<-Password-reset> completed for email={}", resp.email());
+        ResetPasswordResponse response = authService.resetPassword(request);
+        log.info("<-Password-reset> completed for email={}", response.email());
 
         return ResponseEntity
                 .status(HttpStatus.ACCEPTED)
-                .body(resp);
+                .body(response);
     }
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody @Valid LoginRequest request) {
         log.info("POST /login for email={}", request.getEmail());
 
-        AuthResponse resp = authService.login(request);
-        log.info("<-Login-> completed for email={}", resp.email());
+        AuthResponse response = authService.login(request);
+        log.info("<-Login-> completed for email={}", response.email());
 
         return ResponseEntity
                 .status(HttpStatus.ACCEPTED)
-                .body(resp);
+                .body(response);
     }
 }

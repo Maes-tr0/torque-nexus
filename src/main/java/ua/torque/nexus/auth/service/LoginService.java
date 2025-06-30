@@ -7,8 +7,7 @@ import org.springframework.stereotype.Service;
 import ua.torque.nexus.auth.dto.request.LoginRequest;
 import ua.torque.nexus.auth.dto.response.AuthResponse;
 import ua.torque.nexus.auth.mapper.AuthResponseFactory;
-import ua.torque.nexus.user.model.User;
-import ua.torque.nexus.user.service.UserService;
+import ua.torque.nexus.user.service.AuthenticationService;
 
 
 @Slf4j
@@ -16,18 +15,13 @@ import ua.torque.nexus.user.service.UserService;
 @RequiredArgsConstructor
 public class LoginService {
 
-    private final UserService userService;
+    private final AuthenticationService authenticationService;
 
     public AuthResponse loginUser(@Valid LoginRequest request) {
-        log.info("Login start for email={}", request.getEmail());
+        log.debug("Login process started for email={}", request.getEmail());
 
-        User user = userService.getUserByEmail(request.getEmail());
-        log.debug("User fetched: email={}, confirmed={}, role={}",
-                user.getEmail(), user.isEmailConfirmed(), user.getRole().getType());
+        String jwt = authenticationService.loginUser(request.getEmail(), request.getPassword());
 
-        String jwt = userService.loginUser(user, request.getPassword());
-        log.info("JWT token generated for email={}", user.getEmail());
-
-        return AuthResponseFactory.buildAuthResponse(user, jwt);
+        return AuthResponseFactory.buildAuthResponse(request.getEmail(), jwt);
     }
 }

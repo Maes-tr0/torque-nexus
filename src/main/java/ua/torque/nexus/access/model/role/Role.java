@@ -13,24 +13,26 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.NaturalId;
 import ua.torque.nexus.access.model.permission.Permission;
 
 import java.util.HashSet;
 import java.util.Set;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(exclude = "permissions")
+@EqualsAndHashCode(of = "type")
+@ToString(exclude = "permissions")
 @Entity
 @Table(name = "roles")
 public class Role {
@@ -44,7 +46,6 @@ public class Role {
             strategy = GenerationType.SEQUENCE,
             generator = "seq_role"
     )
-    @Setter(AccessLevel.PRIVATE)
     @Column(updatable = false, nullable = false)
     private Long id;
 
@@ -59,5 +60,6 @@ public class Role {
             joinColumns = @JoinColumn(name = "role_id"),
             inverseJoinColumns = @JoinColumn(name = "permission_id")
     )
+    @Builder.Default
     private Set<Permission> permissions = new HashSet<>();
 }

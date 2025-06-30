@@ -6,11 +6,12 @@ import ua.torque.nexus.user.model.User;
 
 public class AuthResponseFactory {
 
-    private AuthResponseFactory() {}
+    private AuthResponseFactory() {
+    }
 
-    public static AuthResponse buildAuthResponse(User user, String jwt) {
+    public static AuthResponse buildAuthResponse(String email, String jwt) {
         return AuthResponse.builder()
-                .email(user.getEmail())
+                .email(email)
                 .token(jwt)
                 .message("Registration successful — please confirm your email")
                 .build();

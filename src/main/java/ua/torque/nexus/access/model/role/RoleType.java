@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 @Getter
 @RequiredArgsConstructor
 public enum RoleType {
-    CUSTOMER("Customer"),
+    CAR_OWNER("Car Owner"),
     ADMIN("Admin");
 
     private final String displayName;

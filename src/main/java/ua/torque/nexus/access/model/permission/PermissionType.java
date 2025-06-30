@@ -6,20 +6,18 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum PermissionType {
-    REGISTER("The user can register an account"),
-    LOGIN("The user can log in"),
-    LOGOUT("The user can log out"),
-    VERIFY_EMAIL("The user can verify their email address"),
-    VIEW_PROFILE("The user can view their profile"),
-    UPDATE_PROFILE("The user can update their profile"),
-    CHANGE_PASSWORD("The user can change his password"),
-    RESET_PASSWORD("The user can reset his password"),
-    DELETE_ACCOUNT("The user can delete his account"),
-    DELETE_ACCOUNTS("The user can delete accounts"),
+    PROFILE_VIEW_OWN("Allows viewing one's own profile"),
+    PROFILE_UPDATE_OWN("Allows updating one's own profile"),
+    PASSWORD_CHANGE_OWN("Allows changing one's own password"),
+    ACCOUNT_DELETE_OWN("Allows deleting one's own account"),
 
-    CREATE_VEHICLE("The user can add a new vehicle"),
-    UPDATE_VEHICLE("The user can update their vehicle information"),
-    DELETE_VEHICLE("The user can delete (unlink) their vehicle");
+    VEHICLE_CREATE_OWN("Allows adding a vehicle to one's own profile"),
+    VEHICLE_UPDATE_OWN("Allows updating one's own vehicles"),
+    VEHICLE_DELETE_OWN("Allows deleting one's own vehicles"),
+
+    USER_VIEW_ANY("Allows viewing any user's profile"),
+    USER_MANAGE_ROLES("Allows assigning and revoking user roles");
+
 
     private final String description;
 }

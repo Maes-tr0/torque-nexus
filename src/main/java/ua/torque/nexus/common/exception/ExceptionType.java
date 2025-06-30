@@ -7,8 +7,6 @@ import org.springframework.http.HttpStatus;
 @Getter
 @RequiredArgsConstructor
 public enum ExceptionType {
-    USER_NOT_FOUND(
-            "User with this id not found or not exists", HttpStatus.NOT_FOUND),
     INPUT_DATA_INVALID(
             "Input data is invalid", HttpStatus.BAD_REQUEST),
     EMAIL_INVALID(
@@ -17,30 +15,29 @@ public enum ExceptionType {
             "Password is too weak", HttpStatus.BAD_REQUEST),
     MISSING_REQUIRED_FIELD(
             "Required field is missing", HttpStatus.BAD_REQUEST),
-    EMAIL_ALREADY_CONFIRMED(
-            "Email is already confirmed", HttpStatus.CONFLICT),
-    TOKEN_EXPIRED(
-            "Token is expired", HttpStatus.GONE),
-    TOKEN_NOT_FOUND(
-            "Token was not found", HttpStatus.NOT_FOUND),
-    EMAIL_NOT_CONFIRMED(
-            "Email is not confirmed", HttpStatus.FORBIDDEN),
     SAME_PASSWORD(
             "New password must be different from the old password", HttpStatus.BAD_REQUEST),
-    USER_ALREADY_REGISTERED(
-            "User is already registered", HttpStatus.CONFLICT),
-    USER_ALREADY_EXISTS(
-            "User already registered and confirmation token is still active", HttpStatus.CONFLICT),
-    PASSWORD_UPDATE_FAILED(
-            "Failed to update password", HttpStatus.INTERNAL_SERVER_ERROR),
     UNSUPPORTED_ROLE_TYPE(
-            "Unsupported role type", HttpStatus.BAD_REQUEST),
-    MULTIPLE_FIELDS_INVALID(
-            "Multiple fields are invalid", HttpStatus.BAD_REQUEST),
-    USER_SAVE_FAILED(
-            "Failed to save user", HttpStatus.INTERNAL_SERVER_ERROR),
+            "Unsupported role type provided", HttpStatus.BAD_REQUEST),
+    TOKEN_INVALID(
+            "The provided token is invalid or missing", HttpStatus.BAD_REQUEST),
     INVALID_CREDENTIALS(
-            "Invalid credentials provided", HttpStatus.UNAUTHORIZED);
+            "Invalid email or password provided", HttpStatus.UNAUTHORIZED),
+    TOKEN_EXPIRED(
+            "The provided token has expired", HttpStatus.UNAUTHORIZED),
+    EMAIL_NOT_CONFIRMED(
+            "User email is not confirmed", HttpStatus.FORBIDDEN),
+    USER_NOT_FOUND(
+            "User with the specified identifier was not found", HttpStatus.NOT_FOUND),
+    USER_EMAIL_ALREADY_EXISTS(
+            "User with this email already exists", HttpStatus.CONFLICT),
+    EMAIL_ALREADY_CONFIRMED(
+            "This email has already been confirmed", HttpStatus.CONFLICT),
+    USER_SAVE_FAILED(
+            "Failed to save user due to a server error", HttpStatus.INTERNAL_SERVER_ERROR),
+    PASSWORD_UPDATE_FAILED(
+            "Failed to update password due to a server error", HttpStatus.INTERNAL_SERVER_ERROR);
+
 
     private final String message;
     private final HttpStatus httpStatus;

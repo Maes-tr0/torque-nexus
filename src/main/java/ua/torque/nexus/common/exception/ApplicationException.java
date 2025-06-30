@@ -12,14 +12,9 @@ public abstract class ApplicationException extends RuntimeException {
     private final ExceptionType type;
     private final HttpStatus status;
 
-    /**
-     * Поле details тимчасово позначене як transient.
-     * У майбутньому, коли знадобиться серіалізація ApplicationException
-     * (наприклад, для збереження помилок у логах, відправки їх у віддалене сховище або інші механізми збереження),
-     * цей модифікатор можна буде прибрати, і поле стане частиною Java‑серіалізації.
-     */
+
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private final transient Map<String, Object> details;
+    private final Map<String, Object> details;
 
     protected ApplicationException(ExceptionType type, String message, Map<String, Object> details) {
         super(message);
@@ -28,7 +23,15 @@ public abstract class ApplicationException extends RuntimeException {
         this.details = details;
     }
 
+    protected ApplicationException(ExceptionType type, Map<String, Object> details) {
+        this(type, type.getMessage(), details);
+    }
+
     protected ApplicationException(ExceptionType type, String message) {
         this(type, message, null);
+    }
+
+    protected ApplicationException(ExceptionType type) {
+        this(type, type.getMessage(), null);
     }
 }

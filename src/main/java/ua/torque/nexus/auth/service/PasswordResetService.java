@@ -19,14 +19,13 @@ public class PasswordResetService {
     private final UserService userService;
 
     public ResetPasswordResponse resetUserPassword(@Valid ResetPasswordRequest request) {
-        log.info("Reset-password start for email={}", request.getEmail());
+        log.debug("Password-reset process started for email={}", request.getEmail());
 
         User user = userService.getUserByEmail(request.getEmail());
         log.debug("User fetched for reset: email={}, confirmed={}, role={}",
                 user.getEmail(), user.isEmailConfirmed(), user.getRole().getType());
 
         User updatedPasswordUser = userService.updatePasswordUser(user, request.getNewPassword());
-        log.info("Password updated for email={}", request.getEmail());
 
         return AuthResponseFactory.buildResetPasswordResponse(updatedPasswordUser);
     }
