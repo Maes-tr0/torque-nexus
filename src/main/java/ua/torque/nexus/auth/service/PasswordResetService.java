@@ -22,8 +22,7 @@ public class PasswordResetService {
         log.debug("Password-reset process started for email={}", request.getEmail());
 
         User user = userService.getUserByEmail(request.getEmail());
-        log.debug("User fetched for reset: email={}, confirmed={}, role={}",
-                user.getEmail(), user.isEmailConfirmed(), user.getRole().getType());
+        log.debug("User fetched for reset: email={}, confirmed={}", user.getEmail(), user.isEmailConfirmed());
 
         User updatedPasswordUser = userService.updatePasswordUser(user, request.getNewPassword());
 

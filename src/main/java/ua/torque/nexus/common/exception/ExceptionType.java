@@ -36,7 +36,9 @@ public enum ExceptionType {
     USER_SAVE_FAILED(
             "Failed to save user due to a server error", HttpStatus.INTERNAL_SERVER_ERROR),
     PASSWORD_UPDATE_FAILED(
-            "Failed to update password due to a server error", HttpStatus.INTERNAL_SERVER_ERROR);
+            "Failed to update password due to a server error", HttpStatus.INTERNAL_SERVER_ERROR),
+    AUTHENTICATION_FAILED(
+            "Authentication failed due to an unexpected error", HttpStatus.INTERNAL_SERVER_ERROR);
 
 
     private final String message;
