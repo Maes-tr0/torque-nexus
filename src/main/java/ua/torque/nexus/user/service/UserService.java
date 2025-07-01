@@ -12,8 +12,8 @@ import ua.torque.nexus.security.service.JwtTokenService;
 import ua.torque.nexus.common.exception.AuthorizationException;
 import ua.torque.nexus.common.exception.InvalidInputException;
 import ua.torque.nexus.common.exception.OperationFailedException;
-import ua.torque.nexus.common.exception.UserConflictException;
-import ua.torque.nexus.common.exception.UserNotFoundException;
+import ua.torque.nexus.common.exception.DataConflictException;
+import ua.torque.nexus.common.exception.DataNotFoundException;
 import ua.torque.nexus.user.model.User;
 import ua.torque.nexus.user.repository.UserRepository;
 
@@ -51,8 +51,10 @@ public class UserService {
     }
 
     @Transactional
-    public User updatePasswordUser(User user, String newPassword) {
-        log.debug("Initiating password update for user: {}", user.getEmail());
+    public User updatePasswordUser(String email, String newPassword) {
+        log.debug("Initiating password update for user: {}", email);
+
+        User user = getUserByEmail(email);
 
         validateUserIsConfirmed(user);
         validateNewPasswordIsDifferent(user, newPassword);
@@ -73,9 +75,10 @@ public class UserService {
     @Transactional
     public void confirmAccount(String email) {
         User user = getUserByEmail(email);
+
         if (user.isEmailConfirmed()) {
             log.warn("Attempted to confirm an already confirmed account for email: {}", email);
-            throw new UserConflictException(ExceptionType.EMAIL_ALREADY_CONFIRMED);
+            throw new DataConflictException(ExceptionType.EMAIL_ALREADY_CONFIRMED);
         }
 
         user.setEmailConfirmed(true);
@@ -89,7 +92,7 @@ public class UserService {
         log.debug("Fetching user by email: {}", email);
         return userRepository.findByEmail(email).orElseThrow(() -> {
             log.error("User not found by email: {}", email);
-            return new UserNotFoundException(ExceptionType.USER_NOT_FOUND, Map.of("email", email));
+            return new DataNotFoundException(ExceptionType.USER_NOT_FOUND, Map.of("email", email));
         });
     }
 
@@ -98,7 +101,7 @@ public class UserService {
         log.debug("Checking if user exists with email: {}", email);
         userRepository.findByEmail(email).ifPresent(user -> {
             log.warn("Attempt to register an existing email: {}", email);
-            throw new UserConflictException(ExceptionType.USER_EMAIL_ALREADY_EXISTS);
+            throw new DataConflictException(ExceptionType.USER_EMAIL_ALREADY_EXISTS);
         });
     }
 

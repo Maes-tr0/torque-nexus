@@ -5,81 +5,101 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ua.torque.nexus.user.model.User;
+import ua.torque.nexus.util.LocationUriBuilder;
 import ua.torque.nexus.vehicle.dto.request.CreateVehicleRequest;
 import ua.torque.nexus.vehicle.dto.request.UpdateVehicleRequest;
 import ua.torque.nexus.vehicle.dto.response.VehicleResponse;
-import ua.torque.nexus.vehicle.service.VehicleService;
+import ua.torque.nexus.vehicle.service.VehicleFacade;
+
+import java.net.URI;
+import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/customer/vehicles")
+@RequestMapping("/api/v1/vehicles")
 @RequiredArgsConstructor
 public class VehicleController {
 
-    private final VehicleService vehicleService;
+    private final VehicleFacade vehicleFacade;
 
 
     @PostMapping
-    //@PreAuthorize("hasAuthority('CREATE_VEHICLE')")
     public ResponseEntity<VehicleResponse> createVehicle(
-            @RequestBody @Valid CreateVehicleRequest createRequest,
-            @AuthenticationPrincipal UserDetails userDetails) {
+            @RequestBody @Valid CreateVehicleRequest request,
+            @AuthenticationPrincipal User currentUser) {
+        log.info("POST /vehicles for user '{}'", currentUser.getEmail());
 
-        String userEmail = userDetails.getUsername();
+        VehicleResponse response = vehicleFacade.createVehicle(request, currentUser);
 
-        log.info("Received request to create vehicle for user: {}", userEmail);
-
-        VehicleResponse response = vehicleService.createVehicle(createRequest, userEmail);
-
-        log.info("Successfully created vehicle with id {} for user {}", response.vinCode(), userEmail);
+        URI uriLocation = LocationUriBuilder.buildLocationUriById(response.id());
+        log.info("<-Vehicle-creation-> completed for user '{}' with vehicleId {}", currentUser.getEmail(), response.id());
 
         return ResponseEntity
-                .status(HttpStatus.CREATED)
+                .created(uriLocation)
                 .body(response);
     }
-
-
+    
     @PatchMapping("/{vehicleId}")
-    @PreAuthorize("hasAuthority('UPDATE_VEHICLE')")
     public ResponseEntity<VehicleResponse> updateVehicle(
             @PathVariable Long vehicleId,
-            @RequestBody @Valid UpdateVehicleRequest updateRequest,
-            @AuthenticationPrincipal UserDetails userDetails) {
+            @RequestBody @Valid UpdateVehicleRequest request,
+            @AuthenticationPrincipal User currentUser) {
+        log.info("PATCH /vehicles/{} for user '{}'", vehicleId, currentUser.getEmail());
 
-        String userEmail = userDetails.getUsername();
-        log.info("Received request to update vehicle id {} for user {}", vehicleId, userEmail);
+        VehicleResponse response = vehicleFacade.updateVehicle(vehicleId, request, currentUser);
+        log.info("<-Vehicle-update-> completed for user '{}' with vehicleId {}", currentUser.getEmail(), vehicleId);
 
-        VehicleResponse response = vehicleService.updateVehicle(vehicleId, updateRequest, userEmail);
-
-        log.info("Successfully updated vehicle id {} for user {}", vehicleId, userEmail);
         return ResponseEntity
-                .status(HttpStatus.ACCEPTED)
+                .status(HttpStatus.OK)
                 .body(response);
     }
 
+    @GetMapping("/{vehicleId}")
+    public ResponseEntity<VehicleResponse> getVehicle(
+            @PathVariable Long vehicleId,
+            @AuthenticationPrincipal User currentUser) {
+        log.info("GET /vehicles/{} for user '{}'", vehicleId, currentUser.getEmail());
+
+        VehicleResponse response = vehicleFacade.getVehicleById(vehicleId, currentUser);
+        log.info("<-Vehicle-fetch-> completed for user '{}' with vehicleId {}", currentUser.getEmail(), vehicleId);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(response);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<VehicleResponse>> getAllUserVehicles(
+            @AuthenticationPrincipal User currentUser) {
+        log.info("GET /vehicles for user '{}'", currentUser.getEmail());
+
+        List<VehicleResponse> response = vehicleFacade.getAllVehiclesForUser(currentUser);
+        log.info("<-Found {} vehicles-> for user '{}'", response.size(), currentUser.getEmail());
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(response);
+    }
 
     @DeleteMapping("/{vehicleId}")
-    @PreAuthorize("hasAuthority('DELETE_VEHICLE')")
     public ResponseEntity<Void> deleteVehicle(
             @PathVariable Long vehicleId,
-            @AuthenticationPrincipal UserDetails userDetails) {
+            @AuthenticationPrincipal User currentUser) {
+        log.info("DELETE /vehicles/{} for user '{}'", vehicleId, currentUser.getEmail());
 
-        String userEmail = userDetails.getUsername();
-        log.info("Received request to unlink vehicle id {} from user {}", vehicleId, userEmail);
+        vehicleFacade.deleteVehicle(vehicleId, currentUser);
+        log.info("<-Vehicle-deletion-> completed for user '{}' with vehicleId {}", currentUser.getEmail(), vehicleId);
 
-        vehicleService.deleteVehicle(vehicleId, userEmail);
-
-        log.info("Successfully unlinked vehicle id {} from user {}", vehicleId, userEmail);
         return ResponseEntity
                 .status(HttpStatus.NO_CONTENT)
                 .build();

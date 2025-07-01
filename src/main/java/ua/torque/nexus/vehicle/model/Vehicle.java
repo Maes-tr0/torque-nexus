@@ -12,9 +12,9 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
@@ -25,12 +25,16 @@ import ua.torque.nexus.user.model.User;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
-@Entity
+@AllArgsConstructor
+@Builder
 @ToString(exclude = "user")
+@Entity
 @Table(name = "vehicles")
 public class Vehicle {
+
     @Id
     @SequenceGenerator(
             name = "seq_vehicle",
@@ -41,7 +45,6 @@ public class Vehicle {
             strategy = GenerationType.SEQUENCE,
             generator = "seq_vehicle"
     )
-    @Setter(AccessLevel.PRIVATE)
     @Column(updatable = false, nullable = false)
     private Long id;
 
@@ -58,6 +61,7 @@ public class Vehicle {
     private String model;
 
     @NotNull(message = "Year cannot be null")
+    @Column(nullable = false)
     private Integer year;
 
     @NotBlank(message = "License plate cannot be blank")
@@ -65,7 +69,7 @@ public class Vehicle {
     private String licensePlate;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @CreationTimestamp
@@ -76,21 +80,13 @@ public class Vehicle {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    @Builder
-    public Vehicle(String vinCode, String mark, String model, Integer year, String licensePlate) {
-        this.vinCode = vinCode;
-        this.mark = mark;
-        this.model = model;
-        this.year = year;
-        this.licensePlate = licensePlate;
-    }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Vehicle vehicle = (Vehicle) o;
-        return vinCode != null && vinCode.equals(vehicle.getVinCode());
+        return vinCode != null && vinCode.equals(vehicle.vinCode);
     }
 
     @Override

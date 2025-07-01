@@ -38,7 +38,13 @@ public enum ExceptionType {
     PASSWORD_UPDATE_FAILED(
             "Failed to update password due to a server error", HttpStatus.INTERNAL_SERVER_ERROR),
     AUTHENTICATION_FAILED(
-            "Authentication failed due to an unexpected error", HttpStatus.INTERNAL_SERVER_ERROR);
+            "Authentication failed due to an unexpected error", HttpStatus.INTERNAL_SERVER_ERROR),
+    VEHICLE_VIN_ALREADY_EXISTS(
+            "Vehicle with this VIN already exists", HttpStatus.CONFLICT),
+    VEHICLE_NOT_FOUND(
+            "Vehicle with this VIN does not exist", HttpStatus.NOT_FOUND),
+    ACCESS_DENIED(
+            "You do not have permission to perform this action", HttpStatus.FORBIDDEN);
 
 
     private final String message;
