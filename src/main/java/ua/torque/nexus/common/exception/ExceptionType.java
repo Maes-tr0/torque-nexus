@@ -9,12 +9,6 @@ import org.springframework.http.HttpStatus;
 public enum ExceptionType {
     INPUT_DATA_INVALID(
             "Input data is invalid", HttpStatus.BAD_REQUEST),
-    EMAIL_INVALID(
-            "Invalid email format", HttpStatus.BAD_REQUEST),
-    PASSWORD_TOO_WEAK(
-            "Password is too weak", HttpStatus.BAD_REQUEST),
-    MISSING_REQUIRED_FIELD(
-            "Required field is missing", HttpStatus.BAD_REQUEST),
     SAME_PASSWORD(
             "New password must be different from the old password", HttpStatus.BAD_REQUEST),
     UNSUPPORTED_ROLE_TYPE(
@@ -23,8 +17,6 @@ public enum ExceptionType {
             "The provided token is invalid or missing", HttpStatus.BAD_REQUEST),
     INVALID_CREDENTIALS(
             "Invalid email or password provided", HttpStatus.UNAUTHORIZED),
-    TOKEN_EXPIRED(
-            "The provided token has expired", HttpStatus.UNAUTHORIZED),
     EMAIL_NOT_CONFIRMED(
             "User email is not confirmed", HttpStatus.FORBIDDEN),
     USER_NOT_FOUND(
@@ -42,9 +34,7 @@ public enum ExceptionType {
     VEHICLE_VIN_ALREADY_EXISTS(
             "Vehicle with this VIN already exists", HttpStatus.CONFLICT),
     VEHICLE_NOT_FOUND(
-            "Vehicle with this VIN does not exist", HttpStatus.NOT_FOUND),
-    ACCESS_DENIED(
-            "You do not have permission to perform this action", HttpStatus.FORBIDDEN);
+            "Vehicle with this VIN does not exist", HttpStatus.NOT_FOUND);
 
 
     private final String message;
