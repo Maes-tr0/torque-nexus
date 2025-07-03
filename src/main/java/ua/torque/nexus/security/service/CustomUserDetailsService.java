@@ -20,11 +20,11 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        log.debug("Loading user by username for Spring Security: {}", email);
+        log.info("event=user_load_by_username_started email={}", email);
 
         return userRepository.findByEmailWithAuthorities(email)
                 .orElseThrow(() -> {
-                    log.warn("User not found during Spring Security lookup: {}", email);
+                    log.warn("event=user_load_by_username_failed status=failure reason=\"User not found in DB\" email={}", email);
                     return new UsernameNotFoundException("User not found with email: " + email);
                 });
     }

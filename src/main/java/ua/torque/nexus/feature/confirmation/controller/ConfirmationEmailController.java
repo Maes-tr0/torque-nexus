@@ -2,7 +2,6 @@ package ua.torque.nexus.feature.confirmation.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,13 +21,12 @@ public class ConfirmationEmailController {
 
     @PostMapping("/confirm")
     public ResponseEntity<ConfirmationEmailResponse> confirmEmail(@RequestParam("token") String token) {
-        log.info("POST /confirm request received.");
+        log.info("event=request_received httpMethod=POST path=/api/v1/auth/confirm");
 
         ConfirmationEmailResponse response = emailConfirmationService.confirmEmail(token);
 
-        log.info("<-Email-confirmation-> completed for email={}", response.email());
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(response);
+        log.info("event=request_completed httpMethod=POST path=/api/v1/auth/confirm status=success httpStatus=200 email={}",
+                response.email());
+        return ResponseEntity.ok(response);
     }
 }

@@ -12,11 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 import ua.torque.nexus.common.exception.AuthenticationException;
 import ua.torque.nexus.common.exception.AuthorizationException;
 import ua.torque.nexus.common.exception.ExceptionType;
-import ua.torque.nexus.common.exception.InvalidInputException;
 import ua.torque.nexus.security.service.JwtTokenService;
 import ua.torque.nexus.user.model.User;
-
-import java.util.Map;
 
 @Slf4j
 @Service
@@ -29,29 +26,29 @@ public class AuthenticationService {
 
 
     public String loginUser(String email, String password) {
+        log.info("event=authentication_started email={}", email);
         Authentication authentication;
+
         try {
-            log.debug("Attempting to authenticate user: {}", email);
             authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(email, password)
             );
         } catch (DisabledException e) {
-            log.warn("Login attempt for disabled (unconfirmed) user '{}'", email);
+            log.warn("event=authentication_failed status=failure reason=\"User account is disabled (email not confirmed)\" email={}", email);
             throw new AuthorizationException(ExceptionType.EMAIL_NOT_CONFIRMED);
 
         } catch (BadCredentialsException e) {
-            log.warn("Authentication failed for user '{}' due to bad credentials.", email);
+            log.warn("event=authentication_failed status=failure reason=\"Invalid credentials\" email={}", email);
             throw new AuthenticationException(ExceptionType.INVALID_CREDENTIALS);
 
         } catch (org.springframework.security.core.AuthenticationException e) {
-            log.error("An unexpected authentication error occurred for user '{}'", email, e);
+            log.error("event=authentication_failed status=failure reason=\"Unexpected authentication error\" email={}", email, e);
             throw new AuthenticationException(ExceptionType.AUTHENTICATION_FAILED);
         }
 
         User user = (User) authentication.getPrincipal();
 
-
-        log.info("User '{}' successfully authenticated.", email);
+        log.info("event=authentication_finished status=success email={}", email);
         return jwtTokenService.generateAuthorizationToken(user);
     }
 }

@@ -21,15 +21,15 @@ public class EmailConfirmationService {
 
     @Transactional
     public ConfirmationEmailResponse confirmEmail(String token) {
-        log.info("Initiating email confirmation process.");
+        log.info("event=email_confirmation_flow_started");
 
         Claims claims = jwtTokenService.validateConfirmationToken(token);
         String userEmail = claims.getSubject();
-
-        log.debug("Token validated for user: {}", userEmail);
+        log.debug("event=token_validated email={}", userEmail);
 
         userService.confirmAccount(userEmail);
 
+        log.info("event=email_confirmation_flow_finished status=success email={}", userEmail);
         return ConfirmationResponseFactory.build(userEmail);
     }
 }

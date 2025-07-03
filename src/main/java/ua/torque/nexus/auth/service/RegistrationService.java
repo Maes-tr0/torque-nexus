@@ -19,14 +19,16 @@ public class RegistrationService {
     private final UserService userService;
     private final AuthMapper authMapper;
 
+
     public AuthResponse registerUser(@Valid RegistrationRequest request) {
-        log.debug("Registration process started for email={}", request.getEmail());
+        log.info("event=registration_started email={}", request.getEmail());
 
         User user = authMapper.toUser(request);
-        log.debug("Mapped DTO → User for email={}", user.getEmail());
+        log.debug("event=dto_to_user_mapping_finished email={}", user.getEmail());
 
         String confirmationToken = userService.createUser(user);
 
+        log.info("event=registration_finished status=success email={}", user.getEmail());
         return AuthResponseFactory.buildAuthResponse(user.getEmail(), confirmationToken);
     }
 }

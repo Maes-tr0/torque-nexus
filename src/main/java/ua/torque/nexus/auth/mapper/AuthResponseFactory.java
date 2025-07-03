@@ -2,7 +2,6 @@ package ua.torque.nexus.auth.mapper;
 
 import ua.torque.nexus.auth.dto.response.AuthResponse;
 import ua.torque.nexus.auth.dto.response.ResetPasswordResponse;
-import ua.torque.nexus.user.model.User;
 
 public class AuthResponseFactory {
 
@@ -17,9 +16,9 @@ public class AuthResponseFactory {
                 .build();
     }
 
-    public static ResetPasswordResponse buildResetPasswordResponse(User user) {
+    public static ResetPasswordResponse buildResetPasswordResponse(String email) {
         return ResetPasswordResponse.builder()
-                .email(user.getEmail())
+                .email(email)
                 .message("Password successfully changed")
                 .build();
     }

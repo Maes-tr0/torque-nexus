@@ -19,18 +19,19 @@ public class AuthService {
     private final LoginService loginService;
     private final PasswordResetService passwordResetService;
 
+
     public AuthResponse register(@Valid RegistrationRequest request) {
-        log.debug("Delegating registration for {}", request.getEmail());
+        log.info("event=delegating_registration email={}", request.getEmail());
         return registrationService.registerUser(request);
     }
 
     public AuthResponse login(@Valid LoginRequest request) {
-        log.debug("Delegating login for {}", request.getEmail());
+        log.info("event=delegating_login email={}", request.getEmail());
         return loginService.loginUser(request);
     }
 
     public ResetPasswordResponse resetPassword(@Valid ResetPasswordRequest request) {
-        log.debug("Delegating password-reset for {}", request.getEmail());
-        return passwordResetService.resetUserPassword(request);
+        log.info("event=delegating_password_reset email={}", request.getEmail());
+        return passwordResetService.processPasswordReset(request);
     }
 }

@@ -24,39 +24,40 @@ public class AuthController {
 
     private final AuthService authService;
 
+
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@RequestBody @Valid RegistrationRequest request) {
-        log.info("POST /register for email={}", request.getEmail());
+        log.info("event=request_received httpMethod=POST path=/api/v1/auth/register email={}",
+                request.getEmail());
 
         AuthResponse response = authService.register(request);
-        log.info("<-Registration-> completed for email={}", response.email());
 
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(response);
+        log.info("event=request_completed httpMethod=POST path=/api/v1/auth/register status=success httpStatus=201 email={}",
+                response.email());
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PostMapping("/reset-password")
     public ResponseEntity<ResetPasswordResponse> resetPassword(@RequestBody @Valid ResetPasswordRequest request) {
-        log.info("POST /reset-password for email={}", request.getEmail());
+        log.info("event=request_received httpMethod=POST path=/api/v1/auth/reset-password email={}",
+                request.getEmail());
 
         ResetPasswordResponse response = authService.resetPassword(request);
-        log.info("<-Password-reset> completed for email={}", response.email());
 
-        return ResponseEntity
-                .status(HttpStatus.ACCEPTED)
-                .body(response);
+        log.info("event=request_completed httpMethod=POST path=/api/v1/auth/reset-password status=success httpStatus=202 email={}",
+                response.email());
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
     }
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody @Valid LoginRequest request) {
-        log.info("POST /login for email={}", request.getEmail());
+        log.info("event=request_received httpMethod=POST path=/api/v1/auth/login email={}",
+                request.getEmail());
 
         AuthResponse response = authService.login(request);
-        log.info("<-Login-> completed for email={}", response.email());
 
-        return ResponseEntity
-                .status(HttpStatus.ACCEPTED)
-                .body(response);
+        log.info("event=request_completed httpMethod=POST path=/api/v1/auth/login status=success httpStatus=202 email={}",
+                response.email());
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
     }
 }
