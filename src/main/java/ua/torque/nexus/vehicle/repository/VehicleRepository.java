@@ -5,11 +5,14 @@ import org.springframework.transaction.annotation.Transactional;
 import ua.torque.nexus.user.model.User;
 import ua.torque.nexus.vehicle.model.Vehicle;
 
+import java.util.List;
 import java.util.Optional;
 
 @Transactional(readOnly = true)
 public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
     Optional<Vehicle> findByVinCode(String vinCode);
 
-    Optional<Vehicle> findVehiclesByUser(User currentUser);
+    Optional<Vehicle> findByIdAndUser(Long id, User user);
+
+    List<Vehicle> findAllByUser(User user);
 }
