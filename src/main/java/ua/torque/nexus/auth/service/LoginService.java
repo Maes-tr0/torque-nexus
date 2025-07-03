@@ -17,11 +17,13 @@ public class LoginService {
 
     private final AuthenticationService authenticationService;
 
+
     public AuthResponse loginUser(@Valid LoginRequest request) {
-        log.debug("Login process started for email={}", request.getEmail());
+        log.info("event=login_started email={}", request.getEmail());
 
         String jwt = authenticationService.loginUser(request.getEmail(), request.getPassword());
 
+        log.info("event=login_finished status=success email={}", request.getEmail());
         return AuthResponseFactory.buildAuthResponse(request.getEmail(), jwt);
     }
 }

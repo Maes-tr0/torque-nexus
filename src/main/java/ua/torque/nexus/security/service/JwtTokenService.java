@@ -1,6 +1,7 @@
 package ua.torque.nexus.security.service;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -8,8 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-import ua.torque.nexus.common.exception.ExceptionType;
 import ua.torque.nexus.common.exception.AuthenticationException;
+import ua.torque.nexus.common.exception.ExceptionType;
 import ua.torque.nexus.user.model.User;
 
 import javax.crypto.SecretKey;
@@ -33,16 +34,15 @@ public class JwtTokenService {
 
 
     public String generateAuthorizationToken(User user) {
-        log.debug("Generating authorization token for user '{}'", user.getEmail());
+        log.debug("event=auth_token_generation_started userId={}", user.getEmail());
         Map<String, Object> claims = Map.of("role", user.getRole().getType().name());
         return buildToken(claims, user.getEmail(), authExpirationMs, getSignInKey(authSecret));
     }
 
     public String generateConfirmationToken(User user) {
-        log.debug("Generating confirmation token for user '{}'", user.getEmail());
+        log.debug("event=confirmation_token_generation_started userId={}", user.getEmail());
         return buildToken(Map.of(), user.getEmail(), confirmationExpirationMs, getSignInKey(confirmationSecret));
     }
-
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject, getSignInKey(authSecret));
@@ -57,7 +57,6 @@ public class JwtTokenService {
         return extractAllClaims(token, getSignInKey(confirmationSecret));
     }
 
-
     private String buildToken(Map<String, Object> extraClaims, String subject, long expiration, SecretKey key) {
         return Jwts.builder()
                 .claims(extraClaims)
@@ -69,14 +68,18 @@ public class JwtTokenService {
     }
 
     private boolean isTokenExpired(String token, SecretKey key) {
-        return extractExpiration(token, key).before(new Date());
+        try {
+            return extractExpiration(token, key).before(new Date());
+        } catch (AuthenticationException e) {
+            return true;
+        }
     }
 
     private Date extractExpiration(String token, SecretKey key) {
         return extractClaim(token, Claims::getExpiration, key);
     }
 
-    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver, SecretKey key) {
+    private <T> T extractClaim(String token, Function<Claims, T> claimsResolver, SecretKey key) {
         final Claims claims = extractAllClaims(token, key);
         return claimsResolver.apply(claims);
     }
@@ -88,9 +91,9 @@ public class JwtTokenService {
                     .build()
                     .parseSignedClaims(token)
                     .getPayload();
-        } catch (Exception e) {
-            log.warn("Invalid JWT token provided: {}", e.getMessage());
-            throw new AuthenticationException(ExceptionType.TOKEN_INVALID, e.getMessage());
+        } catch (JwtException e) {
+            log.warn("event=token_validation_failed status=failure reason=\"{}\"", e.getMessage());
+            throw new AuthenticationException(ExceptionType.TOKEN_INVALID);
         }
     }
 
